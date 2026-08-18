@@ -1,0 +1,75 @@
+{
+  "$schema": "../../schemas/exam.schema.json",
+  "schemaVersion": 1,
+  "id": "cca",
+  "shortName": "CCA",
+  "title": "Cilium Certified Associate",
+  "description": "Practice the core concepts covered by the Cilium Certified Associate exam.",
+  "contentStatus": "sample",
+  "questions": [
+    {
+      "id": "cca-001",
+      "topic": "Architecture",
+      "question": "Which Linux kernel technology is central to Cilium's networking, observability, and security capabilities?",
+      "choices": [
+        { "id": "a", "text": "iptables" },
+        { "id": "b", "text": "eBPF" },
+        { "id": "c", "text": "IPVS" },
+        { "id": "d", "text": "Open vSwitch" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium uses **eBPF** programs in the Linux kernel to provide networking, security, and observability while avoiding a dependency on traditional per-packet iptables processing.",
+        "ja": "CiliumはLinuxカーネル内の **eBPF** プログラムを利用し、従来のパケット単位のiptables処理に依存せず、ネットワーク・セキュリティ・可観測性を提供します。"
+      }
+    },
+    {
+      "id": "cca-002",
+      "topic": "Operations",
+      "question": "Which command is commonly used to verify the health of a Cilium installation?",
+      "choices": [
+        { "id": "a", "text": "`cilium status`" },
+        { "id": "b", "text": "`cilium inspect`" },
+        { "id": "c", "text": "`kubectl cilium health`" },
+        { "id": "d", "text": "`hubble status --cluster`" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`cilium status` reports the state of Cilium components and is the usual first check after installation or during troubleshooting.",
+        "ja": "`cilium status` はCiliumの各コンポーネントの状態を表示します。インストール後やトラブルシューティング時の基本的な確認コマンドです。"
+      }
+    },
+    {
+      "id": "cca-003",
+      "topic": "Network Policy",
+      "question": "A policy must allow requests only to a specific HTTP path. At which layer does Cilium enforce this rule?",
+      "choices": [
+        { "id": "a", "text": "Layer 2" },
+        { "id": "b", "text": "Layer 3" },
+        { "id": "c", "text": "Layer 4" },
+        { "id": "d", "text": "Layer 7" }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "An HTTP path is application-layer information, so matching it requires a **Layer 7** policy. Layer 3 and Layer 4 rules can match network addresses and ports, but not HTTP paths.",
+        "ja": "HTTPパスはアプリケーション層の情報なので、照合には **Layer 7** ポリシーが必要です。Layer 3やLayer 4のルールではアドレスやポートを照合できますが、HTTPパスは扱えません。"
+      }
+    },
+    {
+      "id": "cca-004",
+      "topic": "Observability",
+      "question": "Which Cilium component provides network flow visibility and service-map data?",
+      "choices": [
+        { "id": "a", "text": "Tetragon" },
+        { "id": "b", "text": "Hubble" },
+        { "id": "c", "text": "CoreDNS" },
+        { "id": "d", "text": "Envoy Gateway" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "**Hubble** is Cilium's observability layer. It uses Cilium's eBPF data path to expose flow records, metrics, and service communication information.",
+        "ja": "**Hubble** はCiliumの可観測性レイヤーです。CiliumのeBPFデータパスを利用して、フローレコード、メトリクス、サービス間通信の情報を提供します。"
+      }
+    }
+  ]
+}

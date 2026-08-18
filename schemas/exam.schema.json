@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.cncf-exams-drill.test/schemas/exam.schema.json",
+  "title": "CNCF Exams Drill exam data",
+  "description": "A static exam and its ordered multiple-choice questions. Markdown is supported in question, choice, and explanation strings.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "shortName",
+    "title",
+    "description",
+    "contentStatus",
+    "questions"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "shortName": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "contentStatus": { "enum": ["sample", "ready"] },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/question" }
+    }
+  },
+  "$defs": {
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "text": { "type": "string", "minLength": 1 }
+      }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "topic",
+        "question",
+        "choices",
+        "correctChoiceId",
+        "explanation"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "topic": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "choices": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/choice" }
+        },
+        "correctChoiceId": { "type": "string", "minLength": 1 },
+        "explanation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en", "ja"],
+          "properties": {
+            "en": { "type": "string", "minLength": 1 },
+            "ja": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}
