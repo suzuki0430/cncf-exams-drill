@@ -44,15 +44,15 @@ async function loadCcaData(): Promise<unknown> {
   return JSON.parse(await readFile(fileUrl, "utf8")) as unknown;
 }
 
-test("accepts the bundled ordered four-choice exam", async () => {
+test("accepts all 120 ordered CCA questions", async () => {
   const exam = validateExamData(await loadCcaData());
 
-  assert.equal(exam.id, "cca");
-  assert.equal(exam.questions.length, 4);
-  assert.deepEqual(
-    exam.questions.map((question) => question.id),
-    ["cca-001", "cca-002", "cca-003", "cca-004"],
-  );
+  assert.equal(exam.id, "cca-practice-120");
+  assert.equal(exam.contentStatus, "ready");
+  assert.equal(exam.questions.length, 120);
+  assert.equal(exam.questions[0].id, "cca-001");
+  assert.equal(exam.questions.at(-1)?.id, "cca-120");
+  assert.equal(new Set(exam.questions.map((question) => question.id)).size, 120);
 });
 
 test("rejects a correct answer that is not one of the four choices", async () => {
@@ -78,13 +78,17 @@ test("rejects duplicate stable question IDs", async () => {
 
 test("stores mastery separately for each exam", () => {
   const storage = new MemoryStorage();
-  writeMasteredQuestionIds(storage, "cca", new Set(["cca-002", "cca-001"]));
+  writeMasteredQuestionIds(
+    storage,
+    "cca-practice-120",
+    new Set(["cca-002", "cca-001"]),
+  );
   writeMasteredQuestionIds(storage, "otca", new Set(["otca-001"]));
 
-  assert.deepEqual([...readMasteredQuestionIds(storage, "cca")], [
-    "cca-001",
-    "cca-002",
-  ]);
+  assert.deepEqual(
+    [...readMasteredQuestionIds(storage, "cca-practice-120")],
+    ["cca-001", "cca-002"],
+  );
   assert.deepEqual([...readMasteredQuestionIds(storage, "otca")], ["otca-001"]);
 });
 
@@ -98,7 +102,10 @@ test("defaults explanations to English and persists Japanese", () => {
 
 test("ignores corrupt mastery data instead of blocking the app", () => {
   const storage = new MemoryStorage();
-  storage.setItem("cncf-exams-drill:mastery:cca", "not-json");
+  storage.setItem("cncf-exams-drill:mastery:cca-practice-120", "not-json");
 
-  assert.deepEqual([...readMasteredQuestionIds(storage, "cca")], []);
+  assert.deepEqual(
+    [...readMasteredQuestionIds(storage, "cca-practice-120")],
+    [],
+  );
 });
