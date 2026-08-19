@@ -40,11 +40,11 @@ npm run lint
 npm test
 ```
 
-## Replace the sample questions
+## CCA question data
 
-Edit [`app/data/cca.json`](app/data/cca.json). Questions render in the exact
-order in this array. When the real content is ready, change `contentStatus`
-from `sample` to `ready` to remove the sample-content badge.
+The bundled [`app/data/cca.json`](app/data/cca.json) contains 120 independently
+authored CCA practice questions. Questions render in the exact order in this
+array. Edit this file when correcting or extending the question set.
 
 Each question uses this shape:
 

@@ -1,74 +1,3370 @@
 {
   "$schema": "../../schemas/exam.schema.json",
   "schemaVersion": 1,
-  "id": "cca",
+  "id": "cca-practice-120",
   "shortName": "CCA",
-  "title": "Cilium Certified Associate",
-  "description": "Practice the core concepts covered by the Cilium Certified Associate exam.",
-  "contentStatus": "sample",
+  "title": "Cilium Certified Associate (CCA) Practice Exam — 120 Questions",
+  "description": "Unofficial CCA practice exam with 120 English multiple-choice questions and bilingual explanations. The topic distribution follows the official CCA exam-domain weights and includes manifests, annotations, CLI commands and flags, protocol ports, troubleshooting scenarios, and implementation details.",
+  "contentStatus": "ready",
   "questions": [
     {
       "id": "cca-001",
       "topic": "Architecture",
-      "question": "Which Linux kernel technology is central to Cilium's networking, observability, and security capabilities?",
+      "question": "A Cilium-managed node continues forwarding existing pod traffic, but newly scheduled pods on that node cannot\nobtain networking. Which component on the node is directly responsible for loading endpoint eBPF programs and\nprogramming the local datapath?",
       "choices": [
-        { "id": "a", "text": "iptables" },
-        { "id": "b", "text": "eBPF" },
-        { "id": "c", "text": "IPVS" },
-        { "id": "d", "text": "Open vSwitch" }
+        {
+          "id": "a",
+          "text": "The Cilium agent running as part of the Cilium DaemonSet on that node."
+        },
+        {
+          "id": "b",
+          "text": "Hubble Relay, because it distributes flow state and endpoint routes to all nodes."
+        },
+        {
+          "id": "c",
+          "text": "The Kubernetes scheduler, because it attaches Cilium programs after binding a pod."
+        },
+        {
+          "id": "d",
+          "text": "The Cilium operator Deployment, because it programs every node's eBPF maps directly."
+        }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "explanation": {
-        "en": "Cilium uses **eBPF** programs in the Linux kernel to provide networking, security, and observability while avoiding a dependency on traditional per-packet iptables processing.",
-        "ja": "CiliumはLinuxカーネル内の **eBPF** プログラムを利用し、従来のパケット単位のiptables処理に依存せず、ネットワーク・セキュリティ・可観測性を提供します。"
+        "en": "The Cilium agent runs on each node and manages the node-local datapath, including endpoint configuration,\neBPF programs, service load balancing, policy enforcement, and visibility.",
+        "ja": "Cilium Agentは各Nodeで動作し、そのNodeのEndpoint設定、eBPFプログラム、Service Load Balancing、\nNetworkPolicy、可観測性などのローカルDatapathを管理します。"
       }
     },
     {
       "id": "cca-002",
-      "topic": "Operations",
-      "question": "Which command is commonly used to verify the health of a Cilium installation?",
+      "topic": "Architecture",
+      "question": "The Cilium operator is unavailable for several minutes, while all Cilium agents remain healthy. Which impact is\nmost likely to appear first in a cluster using cluster-pool IPAM?",
       "choices": [
-        { "id": "a", "text": "`cilium status`" },
-        { "id": "b", "text": "`cilium inspect`" },
-        { "id": "c", "text": "`kubectl cilium health`" },
-        { "id": "d", "text": "`hubble status --cluster`" }
+        {
+          "id": "a",
+          "text": "New node PodCIDR allocation may be delayed, while established datapath forwarding can continue."
+        },
+        {
+          "id": "b",
+          "text": "Existing pod-to-pod packets stop because the operator is in the forwarding path."
+        },
+        {
+          "id": "c",
+          "text": "Kubernetes Services immediately lose all eBPF load-balancing entries on every node."
+        },
+        {
+          "id": "d",
+          "text": "Every Hubble flow is lost because the operator stores the per-node ring buffers."
+        }
       ],
       "correctChoiceId": "a",
       "explanation": {
-        "en": "`cilium status` reports the state of Cilium components and is the usual first check after installation or during troubleshooting.",
-        "ja": "`cilium status` はCiliumの各コンポーネントの状態を表示します。インストール後やトラブルシューティング時の基本的な確認コマンドです。"
+        "en": "The operator performs cluster-wide control-plane duties such as cluster-pool IPAM allocation, but it is not in\nthe packet-forwarding or policy-enforcement critical path. Existing programmed datapaths can therefore continue.",
+        "ja": "Operatorはcluster-pool IPAMなどのクラスタ全体の制御を担当しますが、通常のPacket Forwardingの\nクリティカルパスにはいません。そのため既存通信は継続できても、新NodeへのPodCIDR割り当ては遅れ得ます。"
       }
     },
     {
       "id": "cca-003",
-      "topic": "Network Policy",
-      "question": "A policy must allow requests only to a specific HTTP path. At which layer does Cilium enforce this rule?",
+      "topic": "Architecture",
+      "question": "When Kubernetes creates a pod sandbox on a Cilium node, which component is invoked by the container runtime to\nconnect the pod network namespace and then communicates with the local Cilium agent?",
       "choices": [
-        { "id": "a", "text": "Layer 2" },
-        { "id": "b", "text": "Layer 3" },
-        { "id": "c", "text": "Layer 4" },
-        { "id": "d", "text": "Layer 7" }
+        {
+          "id": "a",
+          "text": "The Cilium CNI plugin."
+        },
+        {
+          "id": "b",
+          "text": "The clustermesh-apiserver."
+        },
+        {
+          "id": "c",
+          "text": "The Cilium operator."
+        },
+        {
+          "id": "d",
+          "text": "The Hubble CLI binary."
+        }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "explanation": {
-        "en": "An HTTP path is application-layer information, so matching it requires a **Layer 7** policy. Layer 3 and Layer 4 rules can match network addresses and ports, but not HTTP paths.",
-        "ja": "HTTPパスはアプリケーション層の情報なので、照合には **Layer 7** ポリシーが必要です。Layer 3やLayer 4のルールではアドレスやポートを照合できますが、HTTPパスは扱えません。"
+        "en": "The container runtime invokes the Cilium CNI plugin during pod network setup and teardown. The plugin coordinates\nwith the local Cilium agent to create the endpoint and configure connectivity.",
+        "ja": "PodのNetwork Namespaceを接続するとき、Container RuntimeがCilium CNI Pluginを呼び出します。\nCNI PluginはローカルのCilium Agentと連携してEndpointとネットワークを設定します。"
       }
     },
     {
       "id": "cca-004",
-      "topic": "Observability",
-      "question": "Which Cilium component provides network flow visibility and service-map data?",
+      "topic": "Architecture",
+      "question": "An engineer runs a Hubble client against one Cilium agent's local Unix socket and sees only flows observed on that\nnode. Which architectural fact explains this behavior?",
       "choices": [
-        { "id": "a", "text": "Tetragon" },
-        { "id": "b", "text": "Hubble" },
-        { "id": "c", "text": "CoreDNS" },
-        { "id": "d", "text": "Envoy Gateway" }
+        {
+          "id": "a",
+          "text": "Hubble UI suppresses remote-node flows until Prometheus is enabled."
+        },
+        {
+          "id": "b",
+          "text": "The Cilium operator shards Hubble data by namespace rather than by node."
+        },
+        {
+          "id": "c",
+          "text": "A Hubble Server is embedded in each Cilium agent and exposes that node's observations."
+        },
+        {
+          "id": "d",
+          "text": "Hubble Relay stores only local-node flows unless a Service is marked global."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Each Cilium agent contains a Hubble Server. Its local API exposes flows observed by that node; cluster-wide access\nnormally goes through Hubble Relay.",
+        "ja": "Hubble Serverは各Cilium Agent内にあり、そのNodeで観測したFlowを公開します。クラスタ全体のFlowを\nまとめて参照する場合は通常Hubble Relayを利用します。"
+      }
+    },
+    {
+      "id": "cca-005",
+      "topic": "Architecture",
+      "question": "A platform team wants one Hubble API endpoint that aggregates flows from every Cilium node without copying the\ndatapath into a central proxy. Which component should clients query?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cilium Operator, which periodically exports all BPF maps as flow records."
+        },
+        {
+          "id": "b",
+          "text": "Hubble Relay, which discovers and connects to the per-node Hubble Servers."
+        },
+        {
+          "id": "c",
+          "text": "CoreDNS, which merges node-local Hubble sockets through service discovery."
+        },
+        {
+          "id": "d",
+          "text": "Cilium CNI, which aggregates flows whenever a pod is created or deleted."
+        }
       ],
       "correctChoiceId": "b",
       "explanation": {
-        "en": "**Hubble** is Cilium's observability layer. It uses Cilium's eBPF data path to expose flow records, metrics, and service communication information.",
-        "ja": "**Hubble** はCiliumの可観測性レイヤーです。CiliumのeBPFデータパスを利用して、フローレコード、メトリクス、サービス間通信の情報を提供します。"
+        "en": "Hubble Relay provides a cluster-wide API by discovering the Hubble Servers embedded in Cilium agents and\naggregating their flow streams.",
+        "ja": "Hubble Relayは各NodeのCilium Agent内にあるHubble Serverを発見して接続し、クラスタ全体のFlowを\n1つのAPIとして集約します。"
+      }
+    },
+    {
+      "id": "cca-006",
+      "topic": "Architecture",
+      "question": "You need to inspect the BPF load-balancer map on one specific node. Which tool choice is most appropriate?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Use only the workstation-level `cilium` CLI because it reads every node-local BPF map directly."
+        },
+        {
+          "id": "b",
+          "text": "Query the Cilium operator metrics endpoint because all datapath maps are mirrored there."
+        },
+        {
+          "id": "c",
+          "text": "Run `hubble observe --protocol bpf` through Relay to print the map contents."
+        },
+        {
+          "id": "d",
+          "text": "Execute `cilium-dbg bpf lb list` in the Cilium agent pod on the target node."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "The cluster-level `cilium` CLI manages and inspects the deployment, while `cilium-dbg` is the node-local\ndiagnostic tool that can inspect the local agent and BPF maps.",
+        "ja": "Workstationから使う`cilium` CLIはクラスタレベルの管理用です。特定NodeのBPF Mapを調べる場合は、\n対象NodeのCilium Agent Pod内で`cilium-dbg`を実行します。"
+      }
+    },
+    {
+      "id": "cca-007",
+      "topic": "Architecture",
+      "question": "A pod is recreated with a different IP address but exactly the same security-relevant labels. Under Cilium's\nidentity model, what is the expected policy behavior?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It receives the reserved `world` identity because its previous IP no longer exists."
+        },
+        {
+          "id": "b",
+          "text": "It can receive the same numeric security identity and retain equivalent label-based policy treatment."
+        },
+        {
+          "id": "c",
+          "text": "The pod bypasses policy until kube-proxy creates a replacement identity rule."
+        },
+        {
+          "id": "d",
+          "text": "All policy access is lost because every IP address permanently defines a unique identity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium derives security identities from security-relevant labels rather than tying policy directly to a pod IP.\nA recreated pod with the same label set can therefore receive the same identity and policy treatment.",
+        "ja": "CiliumのSecurity IdentityはPod IPではなく、セキュリティに関係するLabel集合から決まります。\n同じLabelで再作成されたPodは同じIdentityを受け取り、同等のPolicyが適用され得ます。"
+      }
+    },
+    {
+      "id": "cca-008",
+      "topic": "Architecture",
+      "question": "In a standard Kubernetes deployment using Cilium CRDs, where is cluster-wide Cilium state such as identities and\nendpoint metadata primarily represented?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Only in a mandatory external etcd cluster."
+        },
+        {
+          "id": "b",
+          "text": "In Kubernetes custom resources, with an external key-value store being optional for specific deployments."
+        },
+        {
+          "id": "c",
+          "text": "Only in Hubble Relay's in-memory flow cache."
+        },
+        {
+          "id": "d",
+          "text": "Only in iptables-save output on each node."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Modern Cilium Kubernetes deployments commonly use CRDs as the datastore. An external kvstore can be used in\ncertain architectures, but it is not mandatory for a standard CRD-based deployment.",
+        "ja": "一般的なKubernetes上のCiliumではCRDが状態管理に使われます。外部KV Storeを利用する構成もありますが、\n標準的なCRDベース構成で必須ではありません。"
+      }
+    },
+    {
+      "id": "cca-009",
+      "topic": "Architecture",
+      "question": "Why can Cilium replace kube-proxy rather than merely coexist with it as a policy engine?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It implements Kubernetes Service translation and load balancing in eBPF at socket and packet hooks."
+        },
+        {
+          "id": "b",
+          "text": "It replaces the Kubernetes API server's EndpointSlice controller with Hubble Relay."
+        },
+        {
+          "id": "c",
+          "text": "It asks the Cilium operator to proxy every connection through a userspace TCP listener."
+        },
+        {
+          "id": "d",
+          "text": "It converts every ClusterIP Service into a public DNS record managed by CoreDNS."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "kube-proxy's central job is implementing Service virtual-IP behavior. Cilium can implement ClusterIP, NodePort,\nLoadBalancer, and related service translation in eBPF, including socket-level and packet-level paths.",
+        "ja": "kube-proxyの主要な役割はServiceの仮想IPを実Backendへ変換することです。CiliumはこのService\nLoad BalancingをSocket HookやPacket HookのeBPFで実装できるため、kube-proxyを置き換えられます。"
+      }
+    },
+    {
+      "id": "cca-010",
+      "topic": "Architecture",
+      "question": "A process inside a pod connects to a ClusterIP and Cilium translates the destination before the application emits\npackets into the network stack. Which mechanism most directly describes this fast path?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "BGP ECMP selection performed by the upstream router."
+        },
+        {
+          "id": "b",
+          "text": "VXLAN decapsulation at the remote node."
+        },
+        {
+          "id": "c",
+          "text": "Socket-level load balancing attached to cgroup socket hooks."
+        },
+        {
+          "id": "d",
+          "text": "An Envoy HTTP filter attached to every application container."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium's socket load balancer can translate a Service address at socket connect/send time through cgroup socket\nhooks, avoiding repeated per-packet Service lookup for that connection.",
+        "ja": "CiliumのSocket Load BalancerはcgroupのSocket Hookで、接続時などにService AddressをBackendへ\n変換できます。その接続でPacketごとにService Lookupする処理を減らせます。"
+      }
+    },
+    {
+      "id": "cca-011",
+      "topic": "Architecture",
+      "question": "Two nodes have routable host IP addresses, but the underlay has no routes for pod CIDRs. Which Cilium routing\nconfiguration is most likely to work without changing the underlay routes?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Native routing with masquerading disabled and no PodCIDR routes."
+        },
+        {
+          "id": "b",
+          "text": "Kubernetes host-scope IPAM by itself, because IPAM installs all underlay routes."
+        },
+        {
+          "id": "c",
+          "text": "BGP disabled while expecting the Linux hosts to infer every remote PodCIDR."
+        },
+        {
+          "id": "d",
+          "text": "Encapsulation mode using VXLAN or Geneve between the node IPs."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Encapsulation carries pod packets inside node-to-node VXLAN or Geneve packets. The underlay only needs reachability\nbetween node IPs; it does not need awareness of each pod CIDR.",
+        "ja": "Tunnel ModeではPod PacketをNode間のVXLANまたはGeneve Packetにカプセル化します。Underlayは\nNode IP同士を到達可能にすればよく、各PodCIDRへの経路を知る必要がありません。"
+      }
+    },
+    {
+      "id": "cca-012",
+      "topic": "Architecture",
+      "question": "A firewall must permit the default UDP ports for Cilium's two common tunnel protocols. Which pair is correct?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "VXLAN 8472 and Geneve 6081."
+        },
+        {
+          "id": "b",
+          "text": "VXLAN 4244 and Geneve 4245."
+        },
+        {
+          "id": "c",
+          "text": "VXLAN 8472 and Geneve 6091."
+        },
+        {
+          "id": "d",
+          "text": "VXLAN 4789 and Geneve 6081."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Cilium uses UDP 8472 for VXLAN and UDP 6081 for Geneve by default. Port 4244 is associated with Hubble Server,\nnot a tunnel.",
+        "ja": "CiliumのデフォルトではVXLANがUDP 8472、GeneveがUDP 6081です。4244はHubble Server用であり、\nTunnel Portではありません。"
+      }
+    },
+    {
+      "id": "cca-013",
+      "topic": "Architecture",
+      "question": "You switch Cilium to native routing. Which statement describes the new responsibility of the surrounding network?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It must expose Hubble Relay on every node to carry pod packets."
+        },
+        {
+          "id": "b",
+          "text": "It must assign the same PodCIDR to every node so Linux routing can aggregate it."
+        },
+        {
+          "id": "c",
+          "text": "It must terminate an Envoy sidecar for every inter-node pod connection."
+        },
+        {
+          "id": "d",
+          "text": "It must provide routes that make remote pod CIDRs reachable without relying on the Cilium overlay."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Native routing sends packets into the Linux routing subsystem without an overlay header. The network must know how\nto route remote pod prefixes, through direct routes, cloud routing, BGP, or another routing mechanism.",
+        "ja": "Native RoutingではOverlay Headerを付けず、Linux Routing SubsystemへPacketを渡します。そのため\nDirect Route、Cloud Route、BGPなどによりRemote PodCIDRへ到達できる必要があります。"
+      }
+    },
+    {
+      "id": "cca-014",
+      "topic": "Architecture",
+      "question": "All Kubernetes nodes share one Layer 2 segment, and you want Cilium to install direct routes to other nodes'\nPodCIDRs automatically. Which setting is specifically intended for this topology?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`ipam.mode=kubernetes`"
+        },
+        {
+          "id": "b",
+          "text": "`tunnelProtocol=geneve`"
+        },
+        {
+          "id": "c",
+          "text": "`hubble.relay.enabled=true`"
+        },
+        {
+          "id": "d",
+          "text": "`autoDirectNodeRoutes=true`"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`autoDirectNodeRoutes=true` lets Cilium install direct routes through node IPs when all nodes share a common\nLayer 2 network. It does not solve arbitrary multi-hop underlay routing.",
+        "ja": "全Nodeが同じL2 Networkにいる場合、`autoDirectNodeRoutes=true`で他NodeのPodCIDRへのDirect Routeを\n自動設定できます。複数Hopを含む任意のUnderlay Routingを解決する設定ではありません。"
+      }
+    },
+    {
+      "id": "cca-015",
+      "topic": "Architecture",
+      "question": "Cilium is configured with `ipam.mode=kubernetes`. A newly joined node has no value in `spec.podCIDR` or\n`spec.podCIDRs`, and pods remain pending. What is the most likely architectural cause?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Kubernetes has not assigned the node PodCIDR that host-scope IPAM depends on."
+        },
+        {
+          "id": "b",
+          "text": "The Cilium operator has exhausted a CiliumLoadBalancerIPPool."
+        },
+        {
+          "id": "c",
+          "text": "The node has not opened UDP 8472, so local IP allocation cannot start."
+        },
+        {
+          "id": "d",
+          "text": "Hubble Relay has not assigned an identity range to the node."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Kubernetes host-scope IPAM consumes the PodCIDR assigned to the Node object by Kubernetes. If the controller\nmanager is not allocating node CIDRs, the Cilium agent waits and cannot allocate pod IPs from that range.",
+        "ja": "Kubernetes Host Scope IPAMはKubernetesがNode Objectへ設定したPodCIDRを使います。\nkube-controller-managerなどがNode CIDRを割り当てていなければ、Cilium Agentは待機しPod IPを払い出せません。"
+      }
+    },
+    {
+      "id": "cca-016",
+      "topic": "Architecture",
+      "question": "In the default cluster-pool IPAM mode, which sequence most accurately describes how a pod IP becomes available on\na new node?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The Cilium operator assigns PodCIDRs in a CiliumNode, and the node agent allocates pod IPs locally."
+        },
+        {
+          "id": "b",
+          "text": "The cloud load balancer assigns a node range, and Envoy subdivides it per endpoint."
+        },
+        {
+          "id": "c",
+          "text": "kube-proxy allocates a PodCIDR, and Hubble Relay selects one address for each pod."
+        },
+        {
+          "id": "d",
+          "text": "The CNI plugin chooses any unused cluster IP and stores it only in iptables."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "In cluster-pool IPAM, the operator allocates per-node PodCIDRs and records them in `CiliumNode.spec.ipam.podCIDRs`.\nThe Cilium agent then performs host-scope allocation from its node's assigned ranges.",
+        "ja": "Cluster Pool IPAMではCilium OperatorがNodeごとのPodCIDRを割り当て、\n`CiliumNode.spec.ipam.podCIDRs`へ記録します。その範囲から各NodeのAgentがPod IPをローカルに払い出します。"
+      }
+    },
+    {
+      "id": "cca-017",
+      "topic": "Architecture",
+      "question": "Multi-pool IPAM is enabled. You need a pod to fail scheduling rather than silently use the default pool when its\nrequested pool name is unknown. Which annotation should be added to the pod?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`ipam.cilium.io/require-pool-match: \"true\"`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium.io/ipam-strict: \"enabled\"`"
+        },
+        {
+          "id": "c",
+          "text": "`service.cilium.io/shared: \"false\"`"
+        },
+        {
+          "id": "d",
+          "text": "`network.cilium.io/require-pod-cidr: \"true\"`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`ipam.cilium.io/require-pool-match: \"true\"` makes a missing or unmatched requested pool an error. Pool selection\ncan otherwise fall back to the default pool in supported scenarios.",
+        "ja": "`ipam.cilium.io/require-pool-match: \"true\"`を付けると、指定Poolが存在しない、または一致しない場合に\nDefault PoolへFallbackせずエラーにできます。"
+      }
+    },
+    {
+      "id": "cca-018",
+      "topic": "Architecture",
+      "question": "A pod is deleted and recreated with the same labels. Why is the recreated object still represented by a new\nCilium endpoint even if it receives the same security identity?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A security identity is derived from the endpoint ID, so both values must always change together."
+        },
+        {
+          "id": "b",
+          "text": "A Cilium endpoint is a permanent namespace-level policy object rather than a workload instance."
+        },
+        {
+          "id": "c",
+          "text": "Endpoint objects exist only for host-network pods and are unrelated to ordinary pods."
+        },
+        {
+          "id": "d",
+          "text": "Endpoint lifecycle follows the concrete pod/network interface, while identity can be reused by equal labels."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "A Cilium endpoint represents a specific workload networking instance, normally one pod. Its lifecycle follows that\npod. Security identity is a separate label-derived concept and may be reused across equivalent endpoints.",
+        "ja": "Cilium Endpointは通常、特定のPod Network Instanceを表し、そのPodのLifecycleに従います。一方、\nSecurity IdentityはLabel由来なので、別Endpointでも同じLabelなら再利用され得ます。"
+      }
+    },
+    {
+      "id": "cca-019",
+      "topic": "Architecture",
+      "question": "WireGuard encryption is enabled for Cilium-managed pod traffic. Which firewall rule is required between nodes for\nthe default Cilium WireGuard tunnel?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Allow UDP 51871 between node addresses."
+        },
+        {
+          "id": "b",
+          "text": "Allow UDP 6081 only from Hubble Relay."
+        },
+        {
+          "id": "c",
+          "text": "Allow TCP 4250 between all pods."
+        },
+        {
+          "id": "d",
+          "text": "Allow IP protocol ESP between Cilium agents."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Cilium's WireGuard encryption uses UDP port 51871 by default between nodes. TCP 4250 is associated with Cilium\nmutual-auth traffic, while ESP is used by IPsec.",
+        "ja": "CiliumのWireGuard暗号化では、デフォルトでNode間のUDP 51871を許可する必要があります。\nTCP 4250はMutual Authentication関連、ESPはIPsecで使われます。"
+      }
+    },
+    {
+      "id": "cca-020",
+      "topic": "Architecture",
+      "question": "A network team asks for the TCP or UDP port used by Cilium IPsec encryption. What is the most accurate response?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "IPsec uses TCP 4240 so cilium-health can authenticate encrypted packets."
+        },
+        {
+          "id": "b",
+          "text": "IPsec primarily requires IP protocol ESP rather than a Cilium-specific TCP or UDP data port."
+        },
+        {
+          "id": "c",
+          "text": "IPsec always uses TCP 179 because routes and encryption share the BGP session."
+        },
+        {
+          "id": "d",
+          "text": "IPsec always uses UDP 51871, the same fixed port as WireGuard."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "The encrypted data plane for Cilium IPsec uses ESP, an IP protocol, rather than a fixed TCP or UDP application\nport. Additional control-plane requirements depend on the environment.",
+        "ja": "Cilium IPsecの暗号化Data Planeでは、固定のTCP/UDP PortではなくIP ProtocolのESPを利用します。\n環境によって追加要件はありますが、WireGuardの51871/UDPとは異なります。"
+      }
+    },
+    {
+      "id": "cca-021",
+      "topic": "Architecture",
+      "question": "A compliance system requires selected workloads to reach an external SaaS provider from one stable node address.\nWhich Cilium object expresses both the source workloads and the egress gateway selection?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A `CiliumLoadBalancerIPPool`."
+        },
+        {
+          "id": "b",
+          "text": "A `CiliumBGPAdvertisement`."
+        },
+        {
+          "id": "c",
+          "text": "A `CiliumGatewayClassConfig`."
+        },
+        {
+          "id": "d",
+          "text": "A `CiliumEgressGatewayPolicy`."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`CiliumEgressGatewayPolicy` selects source endpoints and destination CIDRs, then identifies the gateway node or\negress interface through which matching outbound traffic should leave.",
+        "ja": "`CiliumEgressGatewayPolicy`は送信元Endpointと宛先CIDRを選択し、該当する外向き通信をどのGateway Node、\nまたはEgress Interfaceから出すかを定義します。"
+      }
+    },
+    {
+      "id": "cca-022",
+      "topic": "Architecture",
+      "question": "You enable Cilium's netkit device mode on a recent Linux kernel, but agent startup reports that the device type is\nunavailable. Which kernel option should be checked first?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`CONFIG_BRIDGE_NF_EBTABLES=y`"
+        },
+        {
+          "id": "b",
+          "text": "`CONFIG_NETKIT=y`"
+        },
+        {
+          "id": "c",
+          "text": "`CONFIG_NETFILTER_XT_TARGET_MASQUERADE=y`"
+        },
+        {
+          "id": "d",
+          "text": "`CONFIG_IP_VS=y`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Netkit device mode requires kernel support built with `CONFIG_NETKIT=y`. Netkit is designed as a modern virtual\ndevice option for efficient eBPF-oriented container networking.",
+        "ja": "Netkit Device ModeにはKernelの`CONFIG_NETKIT=y`が必要です。NetkitはeBPFを前提に効率的な\nContainer Networkingを行うための新しいVirtual Deviceです。"
+      }
+    },
+    {
+      "id": "cca-023",
+      "topic": "Architecture",
+      "question": "Which statement best describes the boundary between Cilium's eBPF datapath and Envoy for application-aware\nnetworking?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "eBPF processes only DNS, while Envoy handles TCP, UDP, and ICMP in the kernel."
+        },
+        {
+          "id": "b",
+          "text": "eBPF handles high-performance L3/L4 paths and redirects selected L7 traffic to node-local Envoy."
+        },
+        {
+          "id": "c",
+          "text": "Envoy performs all L3 routing, while eBPF is used only to export Prometheus metrics."
+        },
+        {
+          "id": "d",
+          "text": "Every pod must contain an Envoy sidecar before Cilium can enforce any L3/L4 policy."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium enforces and forwards much of L3/L4 traffic in eBPF. Features requiring application-protocol parsing, such\nas HTTP policy and Gateway API, use Envoy, with eBPF transparently redirecting the selected traffic.",
+        "ja": "CiliumはL3/L4の多くをeBPFで処理します。HTTP PolicyやGateway APIなどL7解析が必要な通信は、\neBPF DatapathからNode Local Envoyへ透過的にRedirectされます。"
+      }
+    },
+    {
+      "id": "cca-024",
+      "topic": "Architecture",
+      "question": "The Cilium operator is restarted during maintenance. Which statement about its availability is most accurate?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The operator is a per-pod sidecar, so only pods on the same node are affected."
+        },
+        {
+          "id": "b",
+          "text": "The operator replaces the kernel verifier, so already loaded eBPF programs become invalid."
+        },
+        {
+          "id": "c",
+          "text": "Cluster-wide reconciliation may pause, but agents can continue enforcing already programmed datapath state."
+        },
+        {
+          "id": "d",
+          "text": "Every packet must synchronously pass through the operator, so all data traffic stops."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "The operator handles cluster-wide reconciliation outside the normal packet path. Losing it can delay functions\nsuch as IPAM or resource synchronization, but agents retain and enforce existing datapath state.",
+        "ja": "Operatorは通常のPacket Path外でクラスタ全体のReconcileを行います。停止中はIPAMやResource同期が\n遅れ得ますが、Agentは既にProgramされたDatapath Stateを引き続き実行できます。"
+      }
+    },
+    {
+      "id": "cca-025",
+      "topic": "Network Policy",
+      "question": "Cilium runs with the default policy-enforcement mode. A new ingress policy selects `app=api` pods but no egress\npolicy selects them. What is the resulting baseline?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Ingress becomes default deny for the selected pods, while egress remains default allow."
+        },
+        {
+          "id": "b",
+          "text": "Both directions remain default allow until a deny rule is added."
+        },
+        {
+          "id": "c",
+          "text": "Both ingress and egress become default deny because any policy selects the pods."
+        },
+        {
+          "id": "d",
+          "text": "Ingress remains default allow, while egress becomes default deny."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "In the default mode, selecting an endpoint with policy in one direction places that direction into default deny.\nThe other direction remains default allow until a policy selects it in that direction.",
+        "ja": "Default Modeでは、PolicyがEndpointを選択したDirectionだけがDefault Denyになります。この場合は\nIngressだけがDefault Denyとなり、EgressはEgress Policyに選択されるまでDefault Allowです。"
+      }
+    },
+    {
+      "id": "cca-026",
+      "topic": "Network Policy",
+      "question": "The Cilium agent is started with `--enable-policy=never`. What happens after valid CiliumNetworkPolicy and\nKubernetes NetworkPolicy objects are applied?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Only CiliumNetworkPolicy is ignored; Kubernetes NetworkPolicy is still enforced by kube-proxy."
+        },
+        {
+          "id": "b",
+          "text": "Only L7 rules are disabled; L3/L4 rules remain active."
+        },
+        {
+          "id": "c",
+          "text": "Policy enforcement is disabled, so the policies do not restrict endpoint traffic."
+        },
+        {
+          "id": "d",
+          "text": "Every endpoint is placed into default deny because `never` disables allow rules."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`--enable-policy=never` disables network policy enforcement by Cilium. The policy objects can exist, but they\ndo not restrict traffic through the Cilium datapath.",
+        "ja": "`--enable-policy=never`ではCiliumによるNetworkPolicy Enforcementが無効になります。\nPolicy Objectが存在していても、Cilium Datapath上の通信制限には使われません。"
+      }
+    },
+    {
+      "id": "cca-027",
+      "topic": "Network Policy",
+      "question": "Which outcome is specific to `--enable-policy=always` compared with the default mode?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Policy is enforced only for traffic entering through an Ingress controller."
+        },
+        {
+          "id": "b",
+          "text": "All endpoints are placed under policy enforcement even when no policy selects them."
+        },
+        {
+          "id": "c",
+          "text": "Only endpoints selected by a deny policy are protected."
+        },
+        {
+          "id": "d",
+          "text": "All Cilium policies are converted into Kubernetes NetworkPolicy resources."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "In `always` mode, all endpoints are policy-enforced. Without explicit allow rules, traffic can therefore be denied\neven for endpoints that no policy selector would have selected in the default mode.",
+        "ja": "`always` ModeではPolicy Selectorに選択されていないEndpointも含め、すべてのEndpointがPolicy Enforcement\n対象になります。明示的なAllow Ruleがなければ通信が拒否され得ます。"
+      }
+    },
+    {
+      "id": "cca-028",
+      "topic": "Network Policy",
+      "question": "A CiliumNetworkPolicy is created in namespace `payments` with `endpointSelector.matchLabels.app: api`. Which pods\ncan its endpoint selector select?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Only pods on the same node as the policy controller."
+        },
+        {
+          "id": "b",
+          "text": "Only host-network pods labeled `app=api`."
+        },
+        {
+          "id": "c",
+          "text": "Every pod named `api` in every namespace."
+        },
+        {
+          "id": "d",
+          "text": "Pods labeled `app=api` in the `payments` namespace."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "CiliumNetworkPolicy is namespace-scoped. Its `endpointSelector` selects endpoints only in the namespace where the\npolicy object exists.",
+        "ja": "CiliumNetworkPolicyはNamespace Scopeです。`endpointSelector`はPolicy Objectが存在するNamespace内の\nEndpointだけを選択します。"
+      }
+    },
+    {
+      "id": "cca-029",
+      "topic": "Network Policy",
+      "question": "A security baseline must select workload pods across all namespaces and also define cluster-wide egress rules.\nWhich resource is designed for this scope?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "CiliumLocalRedirectPolicy."
+        },
+        {
+          "id": "b",
+          "text": "CiliumEndpoint."
+        },
+        {
+          "id": "c",
+          "text": "CiliumGatewayClassConfig."
+        },
+        {
+          "id": "d",
+          "text": "CiliumClusterwideNetworkPolicy."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "CiliumClusterwideNetworkPolicy is a non-namespaced policy resource whose selectors and rules can apply across the\ncluster.",
+        "ja": "CiliumClusterwideNetworkPolicyはNamespaceに属さないCluster ScopeのPolicy Resourceであり、\nSelectorとRuleをクラスタ全体へ適用できます。"
+      }
+    },
+    {
+      "id": "cca-030",
+      "topic": "Network Policy",
+      "question": "Consider this egress peer selector in a CiliumNetworkPolicy in namespace `shop`:\n\n```yaml\ntoEndpoints:\n  - {}\n```\n\nWhich destinations does the empty selector match?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Only the selected source endpoint itself."
+        },
+        {
+          "id": "b",
+          "text": "All Cilium-managed endpoints in the policy's namespace."
+        },
+        {
+          "id": "c",
+          "text": "No endpoint; an empty selector is always an explicit deny."
+        },
+        {
+          "id": "d",
+          "text": "Every IP in the external `world` identity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "An empty endpoint selector matches all endpoints within the selector's applicable scope. In a namespaced CNP\npeer rule, that means Cilium-managed endpoints in the same namespace unless additional namespace selection is used.",
+        "ja": "空のEndpoint Selectorは、そのSelectorのScope内にあるすべてのEndpointへ一致します。Namespace Scopeの\nCNPにあるPeer Ruleなら、通常は同一Namespace内のCilium管理Endpointが対象です。"
+      }
+    },
+    {
+      "id": "cca-031",
+      "topic": "Network Policy",
+      "question": "What is the effect of the following CiliumNetworkPolicy rule for the selected endpoints?\n\n```yaml\ningress:\n  - {}\n```",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It allows ingress from every endpoint in the same namespace."
+        },
+        {
+          "id": "b",
+          "text": "It allows ingress only from the `host` entity."
+        },
+        {
+          "id": "c",
+          "text": "It enables ingress policy enforcement without specifying an allowed source, producing default deny."
+        },
+        {
+          "id": "d",
+          "text": "It disables ingress enforcement because the rule body is empty."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "A bare empty ingress rule does not contain a source allow selector. It is commonly used to put the selected\nendpoints into ingress default-deny state. This differs from `fromEndpoints: - {}`, which matches peers.",
+        "ja": "Bareな`ingress: - {}`にはAllowする送信元Selectorがありません。そのため選択EndpointをIngressの\nDefault Deny状態へ入れます。`fromEndpoints: - {}`がPeerを広く一致させる点とは異なります。"
+      }
+    },
+    {
+      "id": "cca-032",
+      "topic": "Network Policy",
+      "question": "A team must allow egress to `10.20.0.0/16` except the database subnet `10.20.50.0/24`. Which Cilium construct\nexpresses this directly?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`toEntities` with an `exceptEntities` field."
+        },
+        {
+          "id": "b",
+          "text": "`toCIDRSet` with `cidr: 10.20.0.0/16` and an `except` entry."
+        },
+        {
+          "id": "c",
+          "text": "`toEndpoints` with a negative label selector."
+        },
+        {
+          "id": "d",
+          "text": "`toFQDNs` with a CIDR wildcard."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`toCIDRSet` supports CIDR entries with excluded sub-CIDRs through `except`. Plain `toCIDR` does not provide that\nnested exclusion syntax.",
+        "ja": "`toCIDRSet`ではCIDRごとに`except`を指定し、より狭いSubnetを除外できます。単純な`toCIDR`には\nこのNested Exclusion構文がありません。"
+      }
+    },
+    {
+      "id": "cca-033",
+      "topic": "Network Policy",
+      "question": "A `toFQDNs.matchName` rule allows `api.example.com`, which currently resolves to three IP addresses. What traffic\ndoes Cilium allow after observing a valid DNS response?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Traffic to the observed answer IPs while the DNS-derived entries remain valid, subject to any L4/L7 limits."
+        },
+        {
+          "id": "b",
+          "text": "Traffic only through the cluster DNS Service IP, never to the returned destination IPs."
+        },
+        {
+          "id": "c",
+          "text": "Traffic to every subdomain under `example.com` indefinitely."
+        },
+        {
+          "id": "d",
+          "text": "Traffic only to the first A record because a security identity can contain one IP."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Cilium's DNS proxy observes DNS answers and populates policy state for the returned IPs. Multiple answer IPs can be\nallowed, and the entries follow DNS caching and TTL behavior rather than becoming permanent wildcard access.",
+        "ja": "CiliumのDNS ProxyはDNS Answerを観測し、返された複数IPをPolicy Stateへ反映できます。許可は永続的な\nDomain Wildcardではなく、DNS CacheやTTLに従い、さらにL4/L7 Ruleの制約も受けます。"
+      }
+    },
+    {
+      "id": "cca-034",
+      "topic": "Network Policy",
+      "question": "Pods have an egress `toFQDNs` rule for an external API, but DNS queries themselves are denied. Which policy\naddition is normally required so Cilium can learn the destination addresses?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "An egress rule to the DNS resolver on port 53 with an L7 DNS rule permitting the needed queries."
+        },
+        {
+          "id": "b",
+          "text": "A CiliumLoadBalancerIPPool containing the DNS answer addresses."
+        },
+        {
+          "id": "c",
+          "text": "An ingress HTTP rule allowing `GET /dns` from Hubble Relay."
+        },
+        {
+          "id": "d",
+          "text": "A `toEntities: [world]` rule on TCP port 179."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "FQDN policy depends on observing allowed DNS queries and responses through Cilium's DNS proxy. The workload must\nbe allowed to reach its DNS resolver, commonly on port 53, with an appropriate DNS L7 rule.",
+        "ja": "FQDN PolicyはCilium DNS Proxyが許可されたDNS Query/Responseを観測することで動きます。そのため通常、\nDNS Resolverへの53番Portと必要なQueryを許可するL7 DNS Ruleが必要です。"
+      }
+    },
+    {
+      "id": "cca-035",
+      "topic": "Network Policy",
+      "question": "Which egress rule structure is invalid because it combines incompatible Layer 3 destination selectors in one\nrule?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`toCIDRSet` together with `toPorts`."
+        },
+        {
+          "id": "b",
+          "text": "`toEndpoints` together with `toPorts`."
+        },
+        {
+          "id": "c",
+          "text": "`toFQDNs` together with `toEndpoints` in the same egress item."
+        },
+        {
+          "id": "d",
+          "text": "`toFQDNs` together with `toPorts`."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`toFQDNs` cannot be combined in the same egress rule with another L3 destination selector such as `toEndpoints`\nor `toCIDR`. It can be combined with L4/L7 `toPorts` constraints.",
+        "ja": "`toFQDNs`は同じEgress Rule内で`toEndpoints`や`toCIDR`など別のL3 Destination Selectorと組み合わせ\nできません。一方、L4/L7の`toPorts`とは組み合わせられます。"
+      }
+    },
+    {
+      "id": "cca-036",
+      "topic": "Network Policy",
+      "question": "A Cilium L4 policy contains:\n\n```yaml\nports:\n  - port: \"53\"\n```\n\nThe `protocol` field is omitted. Which protocol selection is applied?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "TCP only, because string ports default to TCP."
+        },
+        {
+          "id": "b",
+          "text": "UDP only, because port 53 is recognized as DNS."
+        },
+        {
+          "id": "c",
+          "text": "ANY supported transport protocol for that port unless a protocol is specified."
+        },
+        {
+          "id": "d",
+          "text": "SCTP only, because omitted protocols use the newest supported transport."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "In Cilium port rules, omitting `protocol` means `ANY`; Cilium does not infer UDP from the well-known DNS port.\nSpecify TCP or UDP when the distinction matters.",
+        "ja": "CiliumのPort Ruleで`protocol`を省略すると`ANY`です。53番だからUDPと自動推測されるわけではないため、\n必要に応じてTCPまたはUDPを明示します。"
+      }
+    },
+    {
+      "id": "cca-037",
+      "topic": "Network Policy",
+      "question": "A Service exposes port 80 and forwards to container port 8080. A CiliumNetworkPolicy selects the backend pods and\npermits ingress only to port 8080. Will traffic sent through the Service's port 80 match the policy?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Yes, but only if the Service is annotated as a global service."
+        },
+        {
+          "id": "b",
+          "text": "No; Cilium policies cannot select traffic arriving through a Kubernetes Service."
+        },
+        {
+          "id": "c",
+          "text": "Yes; Cilium evaluates the policy after Service translation against the backend destination port 8080."
+        },
+        {
+          "id": "d",
+          "text": "No; policy always evaluates only the original Service port 80."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium evaluates the relevant endpoint port after Kubernetes Service translation. The connection targets backend\nport 8080, so an ingress rule for 8080 can allow traffic received through Service port 80.",
+        "ja": "Cilium PolicyはService Translation後のBackend側Destination Portを評価します。この例ではServiceの\n80番からBackendの8080番へ変換されるため、8080番を許可するIngress Ruleに一致します。"
+      }
+    },
+    {
+      "id": "cca-038",
+      "topic": "Network Policy",
+      "question": "A port rule specifies a named port and also sets `endPort`. How does Cilium treat the range?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It expands the named port through every integer up to `endPort`."
+        },
+        {
+          "id": "b",
+          "text": "It converts `endPort` into an HTTP status-code matcher."
+        },
+        {
+          "id": "c",
+          "text": "It rejects the entire policy because named ports are unsupported."
+        },
+        {
+          "id": "d",
+          "text": "It ignores `endPort` for the named port rather than creating a numeric range."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Port ranges require numeric start ports. When the starting port is named, `endPort` is ignored rather than being\nused to construct a range.",
+        "ja": "Port Rangeの開始Portには数値が必要です。開始PortがNamed Portの場合、`endPort`はRange作成に使われず\n無視されます。"
+      }
+    },
+    {
+      "id": "cca-039",
+      "topic": "Network Policy",
+      "question": "What does this L7 rule permit for traffic to TCP port 80?\n\n```yaml\nrules:\n  http:\n    - method: GET\n      path: /healthz\n```",
+      "choices": [
+        {
+          "id": "a",
+          "text": "All TCP traffic because L7 fields are informational only."
+        },
+        {
+          "id": "b",
+          "text": "Only TLS handshakes whose SNI is `/healthz`."
+        },
+        {
+          "id": "c",
+          "text": "Every HTTP method whose response status is 200."
+        },
+        {
+          "id": "d",
+          "text": "HTTP requests matching method `GET` and path `/healthz`."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "The HTTP L7 matcher permits requests whose parsed method and path match the specified values. Other HTTP requests\non the policy-controlled tuple are denied unless another allow rule permits them.",
+        "ja": "HTTP L7 Matcherは解析したMethodとPathが指定値に一致するRequestを許可します。同じ通信Tuple上の\n他のHTTP Requestは、別のAllow Ruleがなければ拒否されます。"
+      }
+    },
+    {
+      "id": "cca-040",
+      "topic": "Network Policy",
+      "question": "One policy allows all TCP traffic from `frontend` to `backend:80` at L4. Another policy tries to allow only\n`GET /public` for the same source, destination, and port. What is the effective result?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Only non-HTTP TCP traffic is allowed; HTTP is always denied."
+        },
+        {
+          "id": "b",
+          "text": "The L7 rule always overrides the broader L4 allow because it is more specific."
+        },
+        {
+          "id": "c",
+          "text": "The broad L4 allow can make the L7 restriction ineffective because allow rules are additive."
+        },
+        {
+          "id": "d",
+          "text": "Both rules are ignored because Cilium forbids overlapping policies."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Allow policies are additive. If one rule already allows the complete L4 tuple without L7 restrictions, a second\nnarrower HTTP allow does not subtract access from that broader rule.",
+        "ja": "Allow Policyは加算的です。同じL4 Tupleを無条件に許可するRuleが既にある場合、別の狭いHTTP Ruleを\n追加しても広いAllowから権限を差し引けず、L7制限が実質無効になります。"
+      }
+    },
+    {
+      "id": "cca-041",
+      "topic": "Network Policy",
+      "question": "A Kubernetes NetworkPolicy allows traffic from namespace `web`, while a CiliumClusterwideNetworkPolicy explicitly\ndenies the same source-to-destination tuple. Which decision wins?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Kubernetes NetworkPolicy always wins because it is the native API."
+        },
+        {
+          "id": "b",
+          "text": "The namespaced policy wins over the cluster-wide policy."
+        },
+        {
+          "id": "c",
+          "text": "The deny decision wins, regardless of which supported policy resource supplied the allow."
+        },
+        {
+          "id": "d",
+          "text": "The most recently created object wins."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium deny rules take precedence over allow rules across supported policy resource types. Policy type, creation\norder, and namespace scope do not make an overlapping allow override an explicit deny.",
+        "ja": "CiliumではDeny RuleがAllow Ruleより優先されます。Kubernetes NetworkPolicy、CNP、CCNPの種類や\n作成順序によって、重複する明示DenyをAllowが上書きすることはありません。"
+      }
+    },
+    {
+      "id": "cca-042",
+      "topic": "Network Policy",
+      "question": "Which requirement cannot be expressed as a Cilium deny rule and should instead be modeled by narrowly scoped allow\nrules?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Deny a destination CIDR from selected endpoints."
+        },
+        {
+          "id": "b",
+          "text": "Deny only the HTTP path `/admin` while allowing other paths on the same connection."
+        },
+        {
+          "id": "c",
+          "text": "Deny all TCP traffic from one identity to another."
+        },
+        {
+          "id": "d",
+          "text": "Deny traffic from the `world` entity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium deny policies operate at supported L3/L4 scopes and do not provide URL-specific L7 deny semantics. Model\nthis by allowing only the acceptable HTTP operations and letting the L7 default deny reject the rest.",
+        "ja": "CiliumのDeny Policyは主に対応するL3/L4 Scopeで動作し、特定URLだけを拒否するL7 Denyは提供しません。\n許可したいHTTP OperationだけをAllowし、残りをL7 Default Denyにする設計が適切です。"
+      }
+    },
+    {
+      "id": "cca-043",
+      "topic": "Network Policy",
+      "question": "A policy uses `fromEntities: [\"world\"]` for ingress. Which source category does it select?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Only the Kubernetes API server identity."
+        },
+        {
+          "id": "b",
+          "text": "Only pods in the same namespace."
+        },
+        {
+          "id": "c",
+          "text": "Sources outside the Cilium-managed cluster or cluster mesh."
+        },
+        {
+          "id": "d",
+          "text": "All Cilium-managed endpoints in any connected cluster."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "The reserved `world` entity represents traffic from outside the Cilium-managed cluster or cluster mesh. It is\ndistinct from Cilium-managed workload identities.",
+        "ja": "Reserved Entityの`world`は、Ciliumが管理するClusterまたはCluster Meshの外部から来る通信を表します。\nCilium管理WorkloadのIdentityとは区別されます。"
+      }
+    },
+    {
+      "id": "cca-044",
+      "topic": "Network Policy",
+      "question": "A CiliumNetworkPolicy in namespace `frontend` must allow pods only from namespace `payments`. Which peer label is\nappropriate in `fromEndpoints.matchLabels`?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`k8s:metadata.namespace: payments`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium.io/policy.namespace: payments`"
+        },
+        {
+          "id": "c",
+          "text": "`k8s:io.kubernetes.pod.namespace: payments`"
+        },
+        {
+          "id": "d",
+          "text": "`service.cilium.io/namespace: payments`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium exposes the Kubernetes pod namespace as the identity label\n`k8s:io.kubernetes.pod.namespace`. It can be combined with workload labels for cross-namespace selection.",
+        "ja": "CiliumはPodのNamespaceをIdentity Labelの`k8s:io.kubernetes.pod.namespace`として扱います。\nCross-NamespaceのPeer SelectionではWorkload Labelと組み合わせて利用できます。"
+      }
+    },
+    {
+      "id": "cca-045",
+      "topic": "Network Policy",
+      "question": "You want policy to follow a Kubernetes ServiceAccount rather than mutable application labels. Which Cilium\nidentity label should the endpoint selector use?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`io.cilium.k8s.policy.serviceaccount`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium.io/service-account-name`"
+        },
+        {
+          "id": "c",
+          "text": "`io.cilium.k8s.policy.cluster`"
+        },
+        {
+          "id": "d",
+          "text": "`io.kubernetes.service.account.uid`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Cilium exposes the ServiceAccount name through the security identity label\n`io.cilium.k8s.policy.serviceaccount`, allowing policy to select workloads by their Kubernetes identity.",
+        "ja": "CiliumではServiceAccount名をSecurity Identity Label\n`io.cilium.k8s.policy.serviceaccount`として利用でき、Kubernetes上のWorkload Identityに基づく選択ができます。"
+      }
+    },
+    {
+      "id": "cca-046",
+      "topic": "Network Policy",
+      "question": "A cluster administrator wants to apply L3/L4 ingress rules to node host traffic rather than ordinary pod\nendpoints. Which policy pattern is correct?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A CCNP using `nodeSelector`, with the host firewall feature enabled."
+        },
+        {
+          "id": "b",
+          "text": "A namespaced CNP with `endpointSelector` matching the node name."
+        },
+        {
+          "id": "c",
+          "text": "An HTTPRoute whose `parentRefs` points to the Node object."
+        },
+        {
+          "id": "d",
+          "text": "A CiliumLoadBalancerIPPool with `allowFirstLastIPs: No`."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Host policies are expressed with a CiliumClusterwideNetworkPolicy containing a `nodeSelector`. The Cilium host\nfirewall must also be enabled for those node-selected rules to be enforced.",
+        "ja": "Host Traffic向けPolicyは`nodeSelector`を含むCiliumClusterwideNetworkPolicyで表現します。さらに\nCilium Host Firewall機能を有効にして、Nodeへ選択されたRuleをEnforceする必要があります。"
+      }
+    },
+    {
+      "id": "cca-047",
+      "topic": "Service Mesh",
+      "question": "Which requirement is a typical reason to introduce a service mesh rather than relying only on basic Kubernetes\nService connectivity?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Assigning PodCIDRs to nodes when the controller manager is disabled."
+        },
+        {
+          "id": "b",
+          "text": "Replacing the Kubernetes scheduler with an eBPF scheduler."
+        },
+        {
+          "id": "c",
+          "text": "Creating container images directly from running pods."
+        },
+        {
+          "id": "d",
+          "text": "Consistent mTLS identity, L7 traffic controls, and request-level telemetry without changing every application."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "A service mesh adds cross-cutting service-to-service capabilities such as workload authentication, mTLS,\napplication-aware routing or retries, and request-level observability independently of application code.",
+        "ja": "Service Meshは、Application Codeへ個別実装せずにWorkload Authentication、mTLS、L7 RoutingやRetry、\nRequest単位のObservabilityなどをService間通信へ共通提供します。"
+      }
+    },
+    {
+      "id": "cca-048",
+      "topic": "Service Mesh",
+      "question": "An application pod managed by Cilium Service Mesh shows `1/1` containers ready rather than `2/2`. Why can this be\nnormal?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Hubble Relay replaces both the application and proxy containers after startup."
+        },
+        {
+          "id": "b",
+          "text": "Cilium can use per-node Envoy instead of injecting an Envoy sidecar into every application pod."
+        },
+        {
+          "id": "c",
+          "text": "Cilium disables L7 processing whenever a pod has only one container."
+        },
+        {
+          "id": "d",
+          "text": "The application container includes a hidden kernel namespace that Kubernetes does not count."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium's service-mesh architecture can be sidecarless: eBPF transparently redirects selected traffic to Envoy\nrunning on the node, so each workload pod does not need its own proxy container.",
+        "ja": "Cilium Service MeshはSidecarless構成を取れます。eBPFが対象TrafficをNode上のEnvoyへ透過的にRedirectするため、\n各Application PodにProxy Containerを注入する必要がありません。"
+      }
+    },
+    {
+      "id": "cca-049",
+      "topic": "Service Mesh",
+      "question": "An HTTP request is subject to a Cilium L7 policy. Which packet-path description is most accurate?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "kube-proxy sends the request to Hubble Relay, which returns an allow or deny verdict."
+        },
+        {
+          "id": "b",
+          "text": "The Cilium operator synchronously proxies the request through the Kubernetes API."
+        },
+        {
+          "id": "c",
+          "text": "The request is parsed entirely by an XDP program before the IP header is available."
+        },
+        {
+          "id": "d",
+          "text": "The eBPF datapath redirects the selected connection to node-local Envoy for HTTP parsing and enforcement."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "eBPF performs efficient traffic interception and L3/L4 handling. When application-layer parsing is required, the\nselected traffic is transparently redirected to Envoy, which applies the L7 configuration.",
+        "ja": "eBPFはTraffic InterceptionとL3/L4処理を行い、Application Layer解析が必要な通信をEnvoyへRedirectします。\nHTTPの解析とL7 EnforcementはNode Local Envoyが担当します。"
+      }
+    },
+    {
+      "id": "cca-050",
+      "topic": "Service Mesh",
+      "question": "You enable Cilium Gateway API support in an existing cluster. Which prerequisite combination is required by the\nstandard Cilium setup?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Enable only Hubble UI; Gateway API does not use Envoy."
+        },
+        {
+          "id": "b",
+          "text": "Enable BGP Control Plane and cluster-pool IPAM."
+        },
+        {
+          "id": "c",
+          "text": "Disable kube-proxy replacement and disable the L7 proxy."
+        },
+        {
+          "id": "d",
+          "text": "Enable kube-proxy replacement, the L7 proxy, Gateway API support, and install the Gateway API CRDs."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Cilium Gateway API depends on kube-proxy replacement and Envoy-based L7 proxying, and Kubernetes must have the\nrelevant Gateway API CRDs installed. The Helm value is `gatewayAPI.enabled=true`.",
+        "ja": "Cilium Gateway APIにはkube-proxy replacement、EnvoyによるL7 Proxy、`gatewayAPI.enabled=true`、\nさらにGateway API CRDの導入が必要です。"
+      }
+    },
+    {
+      "id": "cca-051",
+      "topic": "Service Mesh",
+      "question": "Which manifest selects Cilium as the implementation for a standard Kubernetes Ingress?\n\n```yaml\nspec:\n  ingressClassName: ?\n```",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium-envoy`"
+        },
+        {
+          "id": "b",
+          "text": "`hubble-relay`"
+        },
+        {
+          "id": "c",
+          "text": "`io.cilium/gateway-controller`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium`"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Cilium's Ingress controller is selected with `spec.ingressClassName: cilium`. The legacy annotation\n`kubernetes.io/ingress.class: cilium` is also supported for compatibility.",
+        "ja": "Cilium Ingress Controllerは`spec.ingressClassName: cilium`で選択します。互換性のためLegacy Annotationの\n`kubernetes.io/ingress.class: cilium`もサポートされています。"
+      }
+    },
+    {
+      "id": "cca-052",
+      "topic": "Service Mesh",
+      "question": "A single Ingress should receive its own generated LoadBalancer instead of using the cluster's shared Cilium\nIngress load balancer. Which annotation is correct?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`lbipam.cilium.io/sharing-key: \"dedicated\"`"
+        },
+        {
+          "id": "b",
+          "text": "`ingress.cilium.io/loadbalancer-mode: \"dedicated\"`"
+        },
+        {
+          "id": "c",
+          "text": "`service.cilium.io/global: \"dedicated\"`"
+        },
+        {
+          "id": "d",
+          "text": "`gateway.networking.k8s.io/service-mode: \"dedicated\"`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`ingress.cilium.io/loadbalancer-mode` supports `dedicated` and `shared` and can override the Helm default on an\nindividual Ingress.",
+        "ja": "`ingress.cilium.io/loadbalancer-mode`には`dedicated`と`shared`があり、個別IngressでHelmのDefault設定を\nOverrideできます。"
+      }
+    },
+    {
+      "id": "cca-053",
+      "topic": "Service Mesh",
+      "question": "An Ingress has TLS configured and must redirect matching HTTP requests to HTTPS regardless of the global default.\nWhich annotation enables that behavior?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`service.cilium.io/secure: \"true\"`"
+        },
+        {
+          "id": "b",
+          "text": "`ingress.cilium.io/tls-passthrough: \"enabled\"`"
+        },
+        {
+          "id": "c",
+          "text": "`ingress.cilium.io/force-https: \"enabled\"`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium.io/redirect-http: \"443\"`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`ingress.cilium.io/force-https: \"enabled\"` requests enforced HTTPS redirects for hosts with TLS configuration.\nTLS passthrough is a different behavior and does not mean HTTP-to-HTTPS redirection.",
+        "ja": "`ingress.cilium.io/force-https: \"enabled\"`はTLS設定されたHostへのHTTP RequestをHTTPSへRedirectします。\nTLS Passthroughは別機能であり、HTTPからHTTPSへのRedirectを意味しません。"
+      }
+    },
+    {
+      "id": "cca-054",
+      "topic": "Service Mesh",
+      "question": "External traffic reaches a Cilium Gateway, but a default-deny policy still blocks access to the backend. Which\ntwo logical policy legs may both need explicit allowance?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "From `cluster` to `init`, then from `init` to `all`."
+        },
+        {
+          "id": "b",
+          "text": "From `world` to the special `ingress` identity, then from `ingress` to the backend identity."
+        },
+        {
+          "id": "c",
+          "text": "From the backend to `health`, then from `health` to `remote-node`."
+        },
+        {
+          "id": "d",
+          "text": "From `host` to `world`, then from `world` to `kube-apiserver`."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Traffic entering Cilium Ingress or Gateway API is assigned the special `ingress` identity at Envoy. Policy may\ntherefore enforce both the external `world`-to-`ingress` leg and the `ingress`-to-backend leg.",
+        "ja": "Cilium Ingress/Gatewayへ入ったTrafficはEnvoyでSpecial `ingress` Identityを割り当てられます。そのため\n`world`→`ingress`と`ingress`→Backendの両方をPolicyで許可する必要があります。"
+      }
+    },
+    {
+      "id": "cca-055",
+      "topic": "Service Mesh",
+      "question": "Which `GatewayClass` field identifies the Cilium Gateway API controller?\n\n```yaml\nspec:\n  controllerName: ?\n```",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`io.cilium/gateway-controller`"
+        },
+        {
+          "id": "b",
+          "text": "`io.kubernetes/cilium-gateway`"
+        },
+        {
+          "id": "c",
+          "text": "`gateway.cilium.io/envoy`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium.io/ingress-controller`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "A Cilium-managed `GatewayClass` uses `spec.controllerName: io.cilium/gateway-controller`. Gateway objects then\nreference a class by its Kubernetes resource name through `gatewayClassName`.",
+        "ja": "Cilium管理の`GatewayClass`では`spec.controllerName: io.cilium/gateway-controller`を指定します。\nGateway Objectは`gatewayClassName`でそのGatewayClass Resource名を参照します。"
+      }
+    },
+    {
+      "id": "cca-056",
+      "topic": "Service Mesh",
+      "question": "A cluster has GatewayClasses named `cilium` and `istio`. Which field in a `Gateway` selects the desired class, and\nwhere are protocol and edge listening port defined?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`gatewayClassName` selects it, while `listeners` define protocol and port."
+        },
+        {
+          "id": "b",
+          "text": "`backendRefs` selects it, while a Service defines the Gateway listener."
+        },
+        {
+          "id": "c",
+          "text": "`controllerName` selects it, while an HTTPRoute defines every listener."
+        },
+        {
+          "id": "d",
+          "text": "`parentRefs` selects it, while a ReferenceGrant defines protocol and port."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`Gateway.spec.gatewayClassName` selects the implementation class. `Gateway.spec.listeners` define names,\nprotocols such as HTTP or HTTPS, ports, hostname constraints, and route attachment rules.",
+        "ja": "`Gateway.spec.gatewayClassName`が実装Classを選択し、`Gateway.spec.listeners`がHTTP/HTTPSなどのProtocol、\nPort、Hostname、Route Attachment条件を定義します。"
+      }
+    },
+    {
+      "id": "cca-057",
+      "topic": "Service Mesh",
+      "question": "In an HTTPRoute, which fields connect the route to its entry Gateway and send matched requests to Kubernetes\nServices?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`nodeSelector` and `serviceSelector`."
+        },
+        {
+          "id": "b",
+          "text": "`endpointSelector` and `toServices`."
+        },
+        {
+          "id": "c",
+          "text": "`parametersRef` and `certificateRefs`."
+        },
+        {
+          "id": "d",
+          "text": "`parentRefs` and `backendRefs`."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`parentRefs` attach a Route to a Gateway or another supported parent. Within a rule, `backendRefs` identify the\nbackend Services and ports that receive matched requests.",
+        "ja": "`parentRefs`はRouteをGatewayなどのParentへAttachし、Rule内の`backendRefs`はMatched Requestを転送する\nBackend ServiceとPortを指定します。"
+      }
+    },
+    {
+      "id": "cca-058",
+      "topic": "Service Mesh",
+      "question": "An HTTPRoute sends 90% of traffic to `api-v1` and 10% to `api-v2`. Which Gateway API mechanism expresses this\nsplit?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Two GatewayClasses with different controller names."
+        },
+        {
+          "id": "b",
+          "text": "Multiple `backendRefs` with relative `weight` values of 90 and 10."
+        },
+        {
+          "id": "c",
+          "text": "Two listeners using ports 90 and 10."
+        },
+        {
+          "id": "d",
+          "text": "Two Services sharing one LB IPAM sharing key."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Gateway API traffic splitting is configured with multiple `backendRefs` and relative integer weights. The values\nare proportions; they do not need to total exactly 100, though 90 and 10 is intuitive.",
+        "ja": "Gateway APIのTraffic Splitは複数の`backendRefs`へ相対的な`weight`を設定します。Weightは比率として\n扱われ、90と10なら概ね90%と10%に分配されます。"
+      }
+    },
+    {
+      "id": "cca-059",
+      "topic": "Service Mesh",
+      "question": "An HTTPRoute in namespace `web` references a backend Service in namespace `payments`. The route is otherwise\ncorrect, but `ResolvedRefs` is false. What is normally missing?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The `service.cilium.io/global` annotation on both Services."
+        },
+        {
+          "id": "b",
+          "text": "A ReferenceGrant in the backend namespace permitting the cross-namespace reference."
+        },
+        {
+          "id": "c",
+          "text": "A CiliumEndpoint object manually created for the Service."
+        },
+        {
+          "id": "d",
+          "text": "A second GatewayClass with the backend namespace as its controller name."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Gateway API cross-namespace references require explicit authorization from the target namespace. A ReferenceGrant\nis created in the target namespace and permits the relevant source kind and referenced kind.",
+        "ja": "Gateway APIのCross-Namespace ReferenceはTarget Namespace側の明示的な許可が必要です。Backend側Namespaceに\nReferenceGrantを作成し、Source KindとReference先Kindを許可します。"
+      }
+    },
+    {
+      "id": "cca-060",
+      "topic": "Service Mesh",
+      "question": "An HTTPS Gateway listener references a TLS Secret stored in a different namespace. Which configuration is required\nin addition to `certificateRefs` on the listener?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A ReferenceGrant in the Secret's namespace authorizing the Gateway reference."
+        },
+        {
+          "id": "b",
+          "text": "A CiliumNetworkPolicy allowing TCP 4245 to the Secret."
+        },
+        {
+          "id": "c",
+          "text": "A BGPAdvertisement selecting the Secret by label."
+        },
+        {
+          "id": "d",
+          "text": "A `toFQDNs` rule matching the certificate's subject name."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "The listener uses `certificateRefs` for TLS termination material. A reference to a Secret in another namespace\nrequires a ReferenceGrant in the Secret's namespace.",
+        "ja": "ListenerはTLS Termination用Materialを`certificateRefs`で参照します。別NamespaceのSecretを参照する場合は、\nSecret側NamespaceにReferenceGrantが必要です。"
+      }
+    },
+    {
+      "id": "cca-061",
+      "topic": "Service Mesh",
+      "question": "A Gateway terminates client TLS, but the platform also requires TLS from the Gateway's Envoy proxy to a backend\nService. Which Gateway API policy resource configures that backend TLS connection?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "BackendTLSPolicy."
+        },
+        {
+          "id": "b",
+          "text": "CiliumEgressGatewayPolicy."
+        },
+        {
+          "id": "c",
+          "text": "HTTPRouteFilterPolicy."
+        },
+        {
+          "id": "d",
+          "text": "CiliumL2AnnouncementPolicy."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`BackendTLSPolicy` configures TLS expectations for connections from the Gateway implementation to a backend,\nincluding server identity validation and trust material as supported by Gateway API.",
+        "ja": "`BackendTLSPolicy`はGateway実装からBackendへのTLS Connectionを設定し、Server Identity Validationや\nTrust MaterialなどのBackend TLS要件を表現します。"
+      }
+    },
+    {
+      "id": "cca-062",
+      "topic": "Service Mesh",
+      "question": "A valid Gateway is accepted but traffic is not programmed. Which internal control flow should you inspect?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The CNI plugin translates the Gateway to a CiliumNode and kube-proxy sends it to Envoy."
+        },
+        {
+          "id": "b",
+          "text": "The API server compiles the Gateway directly into an XDP program without Cilium components."
+        },
+        {
+          "id": "c",
+          "text": "The Cilium operator translates Gateway resources into Cilium Envoy configuration, which agents supply to Envoy."
+        },
+        {
+          "id": "d",
+          "text": "Hubble Relay translates the Gateway to iptables and the scheduler sends it to CoreDNS."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "The operator validates Gateway API resources and translates accepted configuration into Cilium Envoy configuration\nresources. Agents consume those resources and configure embedded or DaemonSet Envoy.",
+        "ja": "Cilium OperatorがGateway API ResourceをValidationし、Acceptedされた設定をCilium Envoy Configurationへ\n変換します。Agentがそれを取得し、EmbeddedまたはDaemonSetのEnvoyへ設定を供給します。"
+      }
+    },
+    {
+      "id": "cca-063",
+      "topic": "Service Mesh",
+      "question": "Which HTTPRoute match demonstrates an advantage over the limited host-and-path model commonly associated with\nclassic Ingress?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Choosing the eBPF verifier version through an HTTP header."
+        },
+        {
+          "id": "b",
+          "text": "Assigning a PodCIDR based on the caller's HTTP method."
+        },
+        {
+          "id": "c",
+          "text": "Matching path prefix, exact header, query parameter, and HTTP method in one route rule."
+        },
+        {
+          "id": "d",
+          "text": "Selecting the Cilium agent DaemonSet by BGP community."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "HTTPRoute can combine structured matches for paths, headers, query parameters, methods, and hostnames, enabling\nmore expressive and portable L7 routing than the basic Ingress model.",
+        "ja": "HTTPRouteはPath、Header、Query Parameter、HTTP Method、HostnameなどのStructured Matchを組み合わせられ、\n基本的なIngress Modelより細かなL7 Routingを表現できます。"
+      }
+    },
+    {
+      "id": "cca-064",
+      "topic": "Service Mesh",
+      "question": "What distinguishes Gateway API GAMMA producer routes from a conventional north-south Gateway attachment?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "They replace every Kubernetes Service with a Cluster Mesh global Service."
+        },
+        {
+          "id": "b",
+          "text": "They attach a Route directly to a Service to control east-west traffic for that service."
+        },
+        {
+          "id": "c",
+          "text": "They require an external BGP router to become the Route parent."
+        },
+        {
+          "id": "d",
+          "text": "They can be processed only by per-pod sidecars and not by Cilium's node proxy."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "In the GAMMA model, a producer route uses a Service as its parent, allowing the service owner to define east-west\ntraffic behavior without creating a north-south Gateway listener.",
+        "ja": "GAMMAのProducer RouteではServiceをParentとしてRouteをAttachし、North-South Gateway Listenerを作らずに\nService OwnerがEast-West Traffic Behaviorを定義できます。"
+      }
+    },
+    {
+      "id": "cca-065",
+      "topic": "Service Mesh",
+      "question": "Which failure mode is common in sidecar-based meshes but avoided when Cilium does not inject a proxy into each pod?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The Linux kernel can never verify an eBPF program."
+        },
+        {
+          "id": "b",
+          "text": "A pod cannot receive a Kubernetes ServiceAccount."
+        },
+        {
+          "id": "c",
+          "text": "The application container is ready while its local sidecar is missing, unready, or running mismatched config."
+        },
+        {
+          "id": "d",
+          "text": "The cluster cannot use any Layer 3 network policy."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Per-pod sidecars introduce an additional lifecycle and version/configuration boundary. A sidecarless node-proxy\ndesign avoids failures caused by an absent, stale, or unready proxy alongside an otherwise healthy application.",
+        "ja": "Per-Pod SidecarではApplicationとは別のLifecycleとVersion/Configuration境界が増えます。Sidecarless構成は、\nApplicationがHealthyでもSidecarが未起動・古い・UnreadyというFailure Modeを避けられます。"
+      }
+    },
+    {
+      "id": "cca-066",
+      "topic": "Network Observability",
+      "question": "Why can Hubble report policy verdicts and workload identities without deploying a packet-capture sidecar beside\nevery application?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Hubble reads plaintext payloads from the cloud load balancer access log."
+        },
+        {
+          "id": "b",
+          "text": "Hubble reconstructs all traffic only from Kubernetes audit logs."
+        },
+        {
+          "id": "c",
+          "text": "Hubble receives flow events from Cilium's eBPF datapath through the Hubble Server embedded in each agent."
+        },
+        {
+          "id": "d",
+          "text": "Hubble requires the application to send OpenTelemetry spans for every packet."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium's datapath already observes forwarding and policy decisions. Each agent's embedded Hubble Server exports\nthose flow events, including Cilium identity and verdict context, without application instrumentation.",
+        "ja": "Cilium Datapath自体がForwardingとPolicy Decisionを観測し、各Agent内のHubble ServerがFlow Eventを\nExportします。そのためApplicationへのPacket Capture Sidecarや計装がなくてもIdentityやVerdictを得られます。"
+      }
+    },
+    {
+      "id": "cca-067",
+      "topic": "Network Observability",
+      "question": "Hubble Relay cannot connect to the Hubble Server on any worker node. Which node firewall port should be checked\nfirst?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "UDP 8472."
+        },
+        {
+          "id": "b",
+          "text": "TCP 179."
+        },
+        {
+          "id": "c",
+          "text": "UDP 51871."
+        },
+        {
+          "id": "d",
+          "text": "TCP 4244."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "The per-node Hubble Server listens on TCP 4244 for Relay connections. BGP uses TCP 179, WireGuard uses UDP 51871,\nand VXLAN uses UDP 8472.",
+        "ja": "各NodeのHubble ServerへHubble Relayが接続する際はTCP 4244を使います。TCP 179はBGP、UDP 51871は\nWireGuard、UDP 8472はVXLANです。"
+      }
+    },
+    {
+      "id": "cca-068",
+      "topic": "Network Observability",
+      "question": "You manually port-forward the Hubble Relay Service and want the local Hubble CLI to use its default server address.\nWhich local port should be forwarded?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "4245."
+        },
+        {
+          "id": "b",
+          "text": "4244."
+        },
+        {
+          "id": "c",
+          "text": "9901."
+        },
+        {
+          "id": "d",
+          "text": "4240."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "The Hubble CLI's default Relay endpoint is `localhost:4245`. The Cilium CLI command\n`cilium hubble port-forward` exposes Relay at `127.0.0.1:4245` by default.",
+        "ja": "Hubble CLIがDefaultで接続するRelay Addressは`localhost:4245`です。`cilium hubble port-forward`も\nDefaultではRelayを`127.0.0.1:4245`へ公開します。"
+      }
+    },
+    {
+      "id": "cca-069",
+      "topic": "Network Observability",
+      "question": "Which command creates the standard local port-forward to Hubble Relay without manually naming the Kubernetes\nService?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`hubble observe --listen`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium hubble port-forward`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium status --relay`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium relay expose`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`cilium hubble port-forward` locates the Hubble Relay Service in the Cilium namespace and establishes the local\nforwarding needed by the Hubble CLI.",
+        "ja": "`cilium hubble port-forward`はCilium Namespace内のHubble Relay Serviceを見つけ、Hubble CLIが使う\nLocal Port Forwardを確立します。"
+      }
+    },
+    {
+      "id": "cca-070",
+      "topic": "Network Observability",
+      "question": "You need a continuously updating stream of new cluster-wide flows from Hubble Relay. Which command is the direct\nchoice?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`hubble observe --follow`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium-dbg endpoint list --watch`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium config view --stream`"
+        },
+        {
+          "id": "d",
+          "text": "`kubectl get ciliumnodes --flow-events`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`hubble observe --follow` keeps the flow query open and prints new matching events as they arrive. Without\n`--follow`, the CLI returns a finite set from the available flow buffer.",
+        "ja": "`hubble observe --follow`はQueryを開いたままにし、新しいMatching Flowを継続表示します。`--follow`なしでは\nFlow Bufferから有限件を取得して終了します。"
+      }
+    },
+    {
+      "id": "cca-071",
+      "topic": "Network Observability",
+      "question": "Reports say `frontend/web` connections to `backend/orders` are intermittently denied. Which command is the most\nfocused starting point for observing new policy drops?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium config set policy-enforcement never`"
+        },
+        {
+          "id": "b",
+          "text": "`hubble observe --from-pod frontend/web --to-pod backend/orders --verdict DROPPED --follow`"
+        },
+        {
+          "id": "c",
+          "text": "`hubble observe --namespace kube-system --protocol dns`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium-dbg bpf lb list --service orders --delete`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Combining source, destination, verdict, and `--follow` filters isolates new dropped flows for the reported path.\nThe resulting events show the policy-denied verdict and related datapath context without disabling enforcement.",
+        "ja": "Source、Destination、`--verdict DROPPED`、`--follow`を組み合わせると、対象経路の新しいDropだけを\n絞り込めます。Policyを無効化せずにVerdictとDatapath Contextを確認できます。"
+      }
+    },
+    {
+      "id": "cca-072",
+      "topic": "Network Observability",
+      "question": "After an HTTP CiliumNetworkPolicy is deployed, Hubble starts showing methods, paths, and response status codes for\nthe selected connection. What most likely caused the additional fields?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "BGP peers began exporting HTTP communities to Hubble Relay."
+        },
+        {
+          "id": "b",
+          "text": "The CNI plugin copied application logs into the kernel routing table."
+        },
+        {
+          "id": "c",
+          "text": "WireGuard decrypted every application payload inside Hubble Relay."
+        },
+        {
+          "id": "d",
+          "text": "Traffic was redirected through the L7 proxy, which generated application-layer flow records."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Application-layer metadata becomes available when selected traffic is parsed by Envoy for L7 policy or traffic\nmanagement. Hubble can then report HTTP request and response fields in addition to L3/L4 flow data.",
+        "ja": "L7 PolicyなどによりTrafficがEnvoyで解析されると、HubbleはL3/L4情報に加えてHTTP Method、Path、\nResponse StatusなどのApplication Layer Fieldを表示できます。"
+      }
+    },
+    {
+      "id": "cca-073",
+      "topic": "Network Observability",
+      "question": "Which Hubble CLI option shows only flows that Cilium reports as encrypted by WireGuard or IPsec?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`--tls-only`"
+        },
+        {
+          "id": "b",
+          "text": "`--verdict ENCRYPTED`"
+        },
+        {
+          "id": "c",
+          "text": "`--protocol esp`"
+        },
+        {
+          "id": "d",
+          "text": "`--encrypted`"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`hubble observe --encrypted` filters for encrypted flows. The complementary option\n`hubble observe --unencrypted` can help detect traffic that did not use the expected encryption path.",
+        "ja": "`hubble observe --encrypted`で暗号化Flowだけを表示できます。反対に`--unencrypted`を使えば、\n想定した暗号化Pathを通っていない通信の調査に役立ちます。"
+      }
+    },
+    {
+      "id": "cca-074",
+      "topic": "Network Observability",
+      "question": "Which Hubble component presents a visual service map and flow exploration interface while querying the\ncluster-wide Relay API?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cilium Operator."
+        },
+        {
+          "id": "b",
+          "text": "Cilium BGP Control Plane."
+        },
+        {
+          "id": "c",
+          "text": "Hubble UI."
+        },
+        {
+          "id": "d",
+          "text": "Cilium CNI."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Hubble UI provides graphical flow exploration and a service dependency map. It uses Hubble Relay for\ncluster-wide data rather than directly reading every node's local socket from the browser.",
+        "ja": "Hubble UIはFlowのGraphical ExplorationとService Dependency Mapを提供します。Browserから各Nodeの\nLocal Socketを直接読むのではなく、Cluster-wideなHubble Relay APIを利用します。"
+      }
+    },
+    {
+      "id": "cca-075",
+      "topic": "Network Observability",
+      "question": "A team needs long-term dashboards and alerts for Cilium packet drops rather than only the finite in-memory Hubble\nflow history. Which integration is most appropriate?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Increase the BGP hold timer until it covers the retention period."
+        },
+        {
+          "id": "b",
+          "text": "Store `kubectl get pods` output in CoreDNS."
+        },
+        {
+          "id": "c",
+          "text": "Convert every NetworkPolicy into a LoadBalancer Service."
+        },
+        {
+          "id": "d",
+          "text": "Enable Cilium/Hubble Prometheus metrics and scrape them with Prometheus."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Hubble flow buffers are useful for interactive investigation, while Prometheus metrics provide time-series\nretention, aggregation, dashboards, and alerting for signals such as drops and protocol metrics.",
+        "ja": "Hubble Flow Bufferは対話的な調査に向きます。長期Retention、Aggregation、Dashboard、Alertには、\nCilium/HubbleのPrometheus Metricsを有効化してPrometheusでScrapeするのが適切です。"
+      }
+    },
+    {
+      "id": "cca-076",
+      "topic": "Network Observability",
+      "question": "Node-to-node health checks fail even though Hubble flow collection works. Which default Cilium port is associated\nwith the `cilium-health` responder and should be investigated?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "TCP 4250."
+        },
+        {
+          "id": "b",
+          "text": "TCP 4245."
+        },
+        {
+          "id": "c",
+          "text": "UDP 6081."
+        },
+        {
+          "id": "d",
+          "text": "TCP 4240."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`cilium-health` uses TCP 4240 by default for health connectivity checks. Hubble Relay's client-facing port is\n4245, and Cilium mutual-auth traffic uses TCP 4250.",
+        "ja": "`cilium-health`はDefaultでTCP 4240を使います。Hubble RelayのClient向けPortは4245、\nCilium Mutual Authentication関連はTCP 4250です。"
+      }
+    },
+    {
+      "id": "cca-077",
+      "topic": "Network Observability",
+      "question": "You are preparing a support bundle after a connectivity failure that has already stopped reproducing. Which\ncommand is designed to collect broad Cilium and Hubble diagnostic state from the cluster?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium connectivity test --cleanup-only`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium sysdump`"
+        },
+        {
+          "id": "c",
+          "text": "`hubble observe --last 1`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium config set debug true`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`cilium sysdump` collects a broad diagnostic bundle including Kubernetes resources, component status, logs, and\nCilium/Hubble state. Hubble observe is better for querying flow events, not assembling a support archive.",
+        "ja": "`cilium sysdump`はKubernetes Resource、Component Status、Log、Cilium/Hubble Stateなどを広く収集する\nSupport Bundle用Commandです。Flow EventのQueryにはHubble Observeを使います。"
+      }
+    },
+    {
+      "id": "cca-078",
+      "topic": "Installation and Configuration",
+      "question": "Cilium is already installed, but Hubble Relay and the Hubble UI were not enabled. Which Cilium CLI command enables\nboth the observability backend and UI components in one operation?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium hubble enable --ui`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium config set hubble-ui true --relay=false`"
+        },
+        {
+          "id": "c",
+          "text": "`hubble observe --ui --all`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium install --hubble-relay=4245`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`cilium hubble enable --ui` enables Hubble, deploys Hubble Relay, and also enables the Hubble UI. The standalone\n`hubble` CLI queries flows; it does not install cluster components.",
+        "ja": "`cilium hubble enable --ui`はHubbleを有効化し、Hubble RelayとHubble UIもDeploymentします。\n`hubble` CLIはFlowをQueryするClientであり、Cluster ComponentのInstallationは行いません。"
+      }
+    },
+    {
+      "id": "cca-079",
+      "topic": "Installation and Configuration",
+      "question": "Immediately after an upgrade, you want a command to block until the Cilium deployment becomes ready rather than\nreturning a single point-in-time status. Which command is the best fit?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`hubble status --all-nodes`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium status --wait`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium sysdump --wait`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium config view --follow`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`cilium status --wait` repeatedly evaluates Cilium component readiness and waits for a successful status. A plain\nstatus command is only a snapshot, while sysdump collects diagnostics.",
+        "ja": "`cilium status --wait`はCilium ComponentのReady状態を継続確認し、成功するまで待機します。\n通常のStatusはSnapshotであり、SysdumpはDiagnostic情報の収集用です。"
+      }
+    },
+    {
+      "id": "cca-080",
+      "topic": "Installation and Configuration",
+      "question": "After installing Cilium, which command deploys the standard test workloads and validates pod-to-pod, Service, DNS,\npolicy, and other supported connectivity paths?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium-health ping --deploy`"
+        },
+        {
+          "id": "b",
+          "text": "`hubble observe --test-connectivity`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium connectivity test`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium status --probe-all-services`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`cilium connectivity test` creates a dedicated test environment and runs the Cilium connectivity suite. It covers\nmore than the node health probes provided by cilium-health.",
+        "ja": "`cilium connectivity test`は専用のTest Workloadを作成し、Cilium Connectivity Test Suiteを実行します。\n`cilium-health`のNode Health Probeより広い通信経路を検証します。"
+      }
+    },
+    {
+      "id": "cca-081",
+      "topic": "Installation and Configuration",
+      "question": "A CI job runs the Cilium connectivity suite. You want a diagnostic archive to be collected automatically only when\na test fails. Which flag should be added?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`--all-flows`"
+        },
+        {
+          "id": "b",
+          "text": "`--exit-zero-on-failure`"
+        },
+        {
+          "id": "c",
+          "text": "`--collect-sysdump-on-failure`"
+        },
+        {
+          "id": "d",
+          "text": "`--force-deploy`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`--collect-sysdump-on-failure` invokes sysdump collection after a failed connectivity test. `--all-flows` changes\nflow output, and `--exit-zero-on-failure` would hide the failure from CI.",
+        "ja": "`--collect-sysdump-on-failure`を付けるとConnectivity Test失敗時にSysdumpを自動収集します。\n`--all-flows`はFlow出力を増やし、`--exit-zero-on-failure`はCIから失敗を隠してしまいます。"
+      }
+    },
+    {
+      "id": "cca-082",
+      "topic": "Installation and Configuration",
+      "question": "You need the cluster-wide Cilium configuration currently stored for the installation, including values such as\nrouting mode and policy enforcement. Which cluster-level CLI command should you run?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`hubble status --config`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium config view`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium-dbg config get all`"
+        },
+        {
+          "id": "d",
+          "text": "`kubectl describe ciliumendpoint --all`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`cilium config view` displays the Cilium installation configuration managed through the Cilium CLI and ConfigMap.\n`cilium-dbg` is primarily a node-local troubleshooting client.",
+        "ja": "`cilium config view`はCilium CLIとConfigMapで管理されるInstallation Configurationを表示します。\n`cilium-dbg`は主に特定Node内のTroubleshootingに使うClientです。"
+      }
+    },
+    {
+      "id": "cca-083",
+      "topic": "Installation and Configuration",
+      "question": "An operator wants to enable Cilium agent debug logging through the supported cluster-level configuration command.\nWhich command uses the correct key and value form?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium config set debug true`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium config set --debug`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium-dbg config set debug=enabled --cluster`"
+        },
+        {
+          "id": "d",
+          "text": "`kubectl annotate daemonset/cilium debug=true`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`cilium config set` accepts a configuration key followed by its value, so `cilium config set debug true` is the\ncorrect form. The command normally updates configuration and restarts Cilium pods.",
+        "ja": "`cilium config set`はConfiguration KeyとValueを順に受け取るため、\n`cilium config set debug true`が正しい形式です。Defaultでは更新後にCilium PodをRestartします。"
+      }
+    },
+    {
+      "id": "cca-084",
+      "topic": "Installation and Configuration",
+      "question": "You are testing a dynamically reloadable option and intentionally do not want `cilium config set` to restart the\nCilium DaemonSet pods. Which command expresses that intent?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium config set debug true --rolling=false`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium config set debug true --restart=false`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium config set debug true --wait=0`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium config set --no-daemonset debug true`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "The boolean `--restart` option defaults to true. Setting `--restart=false` updates the configuration without\nrequesting a Cilium pod restart; whether a value can take effect dynamically still depends on that option.",
+        "ja": "Boolean Flagの`--restart`はDefaultでTrueです。`--restart=false`を指定するとCilium PodのRestartを\n要求せずに設定を更新します。ただし実際に動的反映できるかは各Optionに依存します。"
+      }
+    },
+    {
+      "id": "cca-085",
+      "topic": "Installation and Configuration",
+      "question": "You edit the `cilium-config` ConfigMap directly to set the agent option normally written as\n`--enable-policy=always`. How should the ConfigMap data entry be written?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`policy.enforcement: always`"
+        },
+        {
+          "id": "b",
+          "text": "`enable-policy: always`"
+        },
+        {
+          "id": "c",
+          "text": "`CILIUM_ENABLE_POLICY: always`"
+        },
+        {
+          "id": "d",
+          "text": "`--enable-policy: always`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium ConfigMap keys use the agent option name without the leading `--`. Therefore the entry is `enable-policy: always`, not a literal command-line flag.",
+        "ja": "Cilium ConfigMapではAgent Option名から先頭の`--`を外してKeyにします。そのため`enable-policy: always`と書き、Command-line Flagをそのまま記述しません。"
+      }
+    },
+    {
+      "id": "cca-086",
+      "topic": "Installation and Configuration",
+      "question": "You bootstrap a kube-proxy-free cluster, so Cilium cannot discover the Kubernetes API through an existing\nClusterIP Service. Which Helm settings are typically required in addition to enabling kube-proxy replacement?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`routingMode=tunnel` plus the Hubble Relay address and port 4245"
+        },
+        {
+          "id": "b",
+          "text": "`hostFirewall.enabled=true` plus the kubelet address and port 10250"
+        },
+        {
+          "id": "c",
+          "text": "`kubeProxyReplacement=false` plus the CoreDNS ClusterIP and port 53"
+        },
+        {
+          "id": "d",
+          "text": "`kubeProxyReplacement=true` plus explicit `k8sServiceHost` and `k8sServicePort` values"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "With no kube-proxy present during bootstrap, the API Service virtual IP may not be usable yet. Cilium therefore\nneeds kube-proxy replacement enabled and a directly reachable Kubernetes API host and port.",
+        "ja": "kube-proxyがないBootstrap時点ではKubernetes API ServiceのVirtual IPをまだ利用できない場合があります。\nそのため`kubeProxyReplacement=true`に加え、直接到達可能な`k8sServiceHost`と`k8sServicePort`を指定します。"
+      }
+    },
+    {
+      "id": "cca-087",
+      "topic": "Installation and Configuration",
+      "question": "The underlay can route every PodCIDR, and you want packets forwarded without VXLAN or Geneve encapsulation. Which\nHelm configuration most directly selects this design for IPv4?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`routingMode=tunnel` with `tunnelProtocol=disabled`"
+        },
+        {
+          "id": "b",
+          "text": "`ipam.mode=kubernetes` with `hubble.relay.enabled=true`"
+        },
+        {
+          "id": "c",
+          "text": "`kubeProxyReplacement=false` with `autoDirectNodeRoutes=false`"
+        },
+        {
+          "id": "d",
+          "text": "`routingMode=native` with an appropriate `ipv4NativeRoutingCIDR`"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`routingMode=native` disables routine overlay encapsulation. `ipv4NativeRoutingCIDR` tells Cilium which destination\nrange the underlying Linux and physical network are expected to route without masquerading.",
+        "ja": "`routingMode=native`は通常のOverlay Encapsulationを使わないModeです。`ipv4NativeRoutingCIDR`は、\nLinuxおよびUnderlay NetworkがSNATなしでRouteできるとCiliumがみなすIPv4範囲を示します。"
+      }
+    },
+    {
+      "id": "cca-088",
+      "topic": "Installation and Configuration",
+      "question": "A security appliance permits Geneve but blocks VXLAN. Which Helm value changes Cilium's tunnel protocol while\nretaining encapsulation mode?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`tunnelProtocol=geneve`"
+        },
+        {
+          "id": "b",
+          "text": "`routingMode=geneve`"
+        },
+        {
+          "id": "c",
+          "text": "`geneve.enabled=true` and `vxlan.enabled=false`"
+        },
+        {
+          "id": "d",
+          "text": "`encapsulation.protocol=udp6081`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`tunnelProtocol=geneve` selects Geneve for tunnel mode. The routing mode remains tunnel; Geneve is a tunnel\nprotocol choice rather than a routing mode value.",
+        "ja": "Tunnel ModeのProtocolをGeneveへ変える値は`tunnelProtocol=geneve`です。\nGeneveはRouting Modeそのものではなく、Tunnel Mode内で選択するEncapsulation Protocolです。"
+      }
+    },
+    {
+      "id": "cca-089",
+      "topic": "Installation and Configuration",
+      "question": "You plan to upgrade Cilium while retaining the Helm values from the currently installed release, except for any\nvalues explicitly overridden on the command line. Which option provides that behavior?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium config view --apply`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium upgrade --reset-values`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium upgrade --reuse-values`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium install --inherit-config`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`cilium upgrade --reuse-values` reuses values from the latest Helm release and applies explicit overrides.\n`--reset-values` instead starts from the chart's built-in values.",
+        "ja": "`cilium upgrade --reuse-values`は現在のHelm Releaseの値を再利用し、明示したOverrideを適用します。\n`--reset-values`はChart組み込みのDefault値から開始するため逆の挙動です。"
+      }
+    },
+    {
+      "id": "cca-090",
+      "topic": "Cluster Mesh",
+      "question": "Two clusters use Cilium tunnel mode and have node connectivity, but both allocate pod addresses from\n`10.20.0.0/16`. What is the most fundamental Cluster Mesh problem?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Global Services work only when every pod has a public IP."
+        },
+        {
+          "id": "b",
+          "text": "Tunnel mode requires both clusters to use identical PodCIDRs."
+        },
+        {
+          "id": "c",
+          "text": "Cluster Mesh rewrites all pod addresses, so the overlap is harmless."
+        },
+        {
+          "id": "d",
+          "text": "Their PodCIDRs overlap, so a remote pod IP cannot be routed unambiguously."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Cluster Mesh requires unique, non-overlapping PodCIDRs across all connected clusters and nodes. Cilium preserves pod\naddressing across the mesh rather than automatically NATing overlapping pod networks.",
+        "ja": "Cluster Meshでは接続する全Cluster・全NodeのPodCIDRが一意で重複しない必要があります。\nCiliumは重複Pod Networkを自動NATして解決する仕組みではないため、Remote Pod IPを一意にRouteできません。"
+      }
+    },
+    {
+      "id": "cca-091",
+      "topic": "Cluster Mesh",
+      "question": "Cluster A runs Cilium 1.20.x and Cluster B runs 1.18.x. Their networks and certificates are otherwise correct. Which\nprerequisite is violated?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The older cluster must use kube-proxy rather than Cilium service load balancing."
+        },
+        {
+          "id": "b",
+          "text": "Cluster Mesh supports only odd-numbered minor releases."
+        },
+        {
+          "id": "c",
+          "text": "Cilium versions may differ by no more than one minor release."
+        },
+        {
+          "id": "d",
+          "text": "Connected clusters must run exactly the same patch release."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium versions in a Cluster Mesh may differ by at most one minor release. A 1.20.x-to-1.18.x connection has a\ntwo-minor gap and is outside that supported prerequisite.",
+        "ja": "Cluster Mesh内のCilium Version差は最大1 Minor Releaseです。1.20.xと1.18.xは2 Minor離れているため、\nNetworkやCertificateが正しくてもPrerequisiteを満たしません。"
+      }
+    },
+    {
+      "id": "cca-092",
+      "topic": "Cluster Mesh",
+      "question": "An administrator accidentally assigns `cluster.name=prod` and `cluster.id=7` to two clusters before connecting\nthem. Why must this be corrected?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cluster names may repeat, but every Service name must be globally unique."
+        },
+        {
+          "id": "b",
+          "text": "Each cluster needs a unique human-readable name and numeric ID for mesh identity."
+        },
+        {
+          "id": "c",
+          "text": "Cluster IDs may repeat when the clusters use different PodCIDRs."
+        },
+        {
+          "id": "d",
+          "text": "Only the Kubernetes API server name needs to be unique."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Each Cluster Mesh member must have a unique cluster name and cluster ID. The cluster ID participates in security\nidentity allocation, so changing it on a running cluster can require workload restarts.",
+        "ja": "Cluster Meshに参加する各Clusterには一意なCluster NameとCluster IDが必要です。\nCluster IDはSecurity Identityの生成にも関係するため、稼働中に変更するとWorkloadのRestartが必要になり得ます。"
+      }
+    },
+    {
+      "id": "cca-093",
+      "topic": "Cluster Mesh",
+      "question": "Three clusters use native routing. Each cluster's `ipv4NativeRoutingCIDR` covers only its own PodCIDR, even though\nthe underlay has routes for all three. What should be changed?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Remove the underlay routes and let Hubble Relay advertise the PodCIDRs."
+        },
+        {
+          "id": "b",
+          "text": "Enable VXLAN only for traffic whose source and destination are in different namespaces."
+        },
+        {
+          "id": "c",
+          "text": "Set every cluster's Service CIDR as the native routing CIDR instead."
+        },
+        {
+          "id": "d",
+          "text": "Set the native routing CIDR in each cluster to cover the PodCIDRs of all connected clusters."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "In native-routed Cluster Mesh, each cluster's native routing CIDR must encompass all PodCIDRs in the mesh. This\nallows Cilium to hand those destinations to the underlay without masquerading or encapsulation.",
+        "ja": "Native RoutingのCluster Meshでは、各ClusterのNative Routing CIDRがMesh内すべてのPodCIDRを包含する必要があります。\nこれによりCiliumは対象通信をMasqueradeやEncapsulationせずUnderlayへ渡せます。"
+      }
+    },
+    {
+      "id": "cca-094",
+      "topic": "Cluster Mesh",
+      "question": "A design raises `clustermesh.maxConnectedClusters` from the default 255 to 511. Which consequence is most accurate?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It automatically renumbers existing cluster IDs without traffic disruption."
+        },
+        {
+          "id": "b",
+          "text": "It doubles the maximum identities and can differ between clusters."
+        },
+        {
+          "id": "c",
+          "text": "It changes Hubble Relay from TCP 4245 to TCP 511."
+        },
+        {
+          "id": "d",
+          "text": "It reduces the cluster-local identity space and must be configured consistently across the mesh."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "More bits are reserved for cluster IDs when the limit is 511, leaving fewer bits for cluster-local identities.\nEvery cluster must use the same value, and changing it on a live installation is unsafe.",
+        "ja": "511 Clusterを扱うためCluster ID側へ多くのBitを割り当てるので、Cluster-local Identityの上限は減ります。\nMesh内で同じ値を使う必要があり、既存Clusterでの変更は通信やPolicy Enforcementを壊す恐れがあります。"
+      }
+    },
+    {
+      "id": "cca-095",
+      "topic": "Cluster Mesh",
+      "question": "Which command enables the Cluster Mesh control plane for kubeconfig context `cluster-a`, exposes it through a\nLoadBalancer Service, and enables the local cache of remote cluster information?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium clustermesh connect --context cluster-a --service-type ClusterIP --cache-remote`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium clustermesh enable --context cluster-a --service-type LoadBalancer --enable-kvstoremesh`"
+        },
+        {
+          "id": "c",
+          "text": "`hubble relay enable --context cluster-a --kvstoremesh --port 4245`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium install --context cluster-a --global-service --relay-type LoadBalancer`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`cilium clustermesh enable` installs/enables the Cluster Mesh control-plane components. `--service-type` controls\ntheir exposure, and `--enable-kvstoremesh` enables the extension that caches remote information locally.",
+        "ja": "`cilium clustermesh enable`はCluster Mesh Control Plane Componentを有効化します。\n`--service-type`で公開方式を選び、`--enable-kvstoremesh`でRemote Cluster情報をLocalへCacheするExtensionを有効化します。"
+      }
+    },
+    {
+      "id": "cca-096",
+      "topic": "Cluster Mesh",
+      "question": "Cluster Mesh is enabled separately in kubeconfig contexts `cluster-a` and `cluster-b`. Which command initiated from\ncluster A connects it to cluster B using the CLI's context flags?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium clustermesh enable --context cluster-a --peer cluster-b`"
+        },
+        {
+          "id": "b",
+          "text": "`cilium clustermesh connect --context cluster-a --destination-context cluster-b`"
+        },
+        {
+          "id": "c",
+          "text": "`kubectl --context cluster-b annotate cluster cluster-a=connected`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium config set cluster-a.remote-context cluster-b`"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "The source cluster is selected with the inherited `--context` flag, while the remote target is supplied through\n`--destination-context` to `cilium clustermesh connect`.",
+        "ja": "Source Clusterは共通Flagの`--context`で選択し、Remote Clusterは\n`cilium clustermesh connect`の`--destination-context`で指定します。"
+      }
+    },
+    {
+      "id": "cca-097",
+      "topic": "Cluster Mesh",
+      "question": "After connecting two clusters, which command waits until the Cluster Mesh status for `cluster-a` becomes successful\ninstead of returning immediately?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium status --context cluster-a --mesh-only --follow`"
+        },
+        {
+          "id": "b",
+          "text": "`hubble status --context cluster-a --remote-nodes`"
+        },
+        {
+          "id": "c",
+          "text": "`cilium clustermesh connect --context cluster-a --wait-only`"
+        },
+        {
+          "id": "d",
+          "text": "`cilium clustermesh status --context cluster-a --wait`"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`cilium clustermesh status --wait` waits for successful Cluster Mesh status. `--context` selects the cluster whose\ncontrol-plane and remote-cluster connectivity are inspected.",
+        "ja": "`cilium clustermesh status --wait`はCluster Mesh Statusが成功するまで待機します。\n`--context`でControl PlaneとRemote接続を確認する対象Clusterを選択します。"
+      }
+    },
+    {
+      "id": "cca-098",
+      "topic": "Cluster Mesh",
+      "question": "A Service named `orders` exists in namespace `shop` in both clusters. Which metadata is required for Cilium to treat\nthe two Services as one Global Service?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Set `clusterIP: None` and give each Service a globally unique name."
+        },
+        {
+          "id": "b",
+          "text": "Add `service.cilium.io/shared: \"false\"` to only one Service and use different namespaces."
+        },
+        {
+          "id": "c",
+          "text": "Add `service.cilium.io/global: \"true\"` to the Services while keeping the same name and namespace."
+        },
+        {
+          "id": "d",
+          "text": "Add `cilium.io/cluster-mesh: \"orders.shop\"` to the Deployments rather than the Services."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium Global Services are declared with `service.cilium.io/global: \"true\"` on Services that have matching names\nand namespaces in the connected clusters. Their backends can then participate in cross-cluster load balancing.",
+        "ja": "Cilium Global Serviceは、接続Cluster間で同じNameとNamespaceを持つServiceへ\n`service.cilium.io/global: \"true\"`を付けて宣言します。これによりBackendがCluster間Load Balancingへ参加します。"
+      }
+    },
+    {
+      "id": "cca-099",
+      "topic": "Cluster Mesh",
+      "question": "In cluster A, a Global Service has `service.cilium.io/shared: \"false\"`. Cluster B uses the same Global Service.\nWhat is the precise effect of the annotation on cluster A?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cluster A stops importing all remote endpoints and uses only its own endpoints."
+        },
+        {
+          "id": "b",
+          "text": "Cluster A's local backends are not exported to other clusters, while A may still consume remote backends."
+        },
+        {
+          "id": "c",
+          "text": "The Service becomes a normal non-global Service in every cluster."
+        },
+        {
+          "id": "d",
+          "text": "Only headless endpoints are exported, and ClusterIP endpoints are deleted."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "`shared: \"false\"` prevents that cluster's local backends from being shared outward. It does not by itself stop the\nlocal cluster from seeing and using remote backends of the Global Service.",
+        "ja": "`shared: \"false\"`はそのClusterのLocal Backendを他Clusterへ共有しない設定です。\nそのCluster自身がGlobal ServiceのRemote Backendを参照・利用することまでは禁止しません。"
+      }
+    },
+    {
+      "id": "cca-100",
+      "topic": "Cluster Mesh",
+      "question": "A Global Service should keep traffic local during normal operation but fail over to healthy remote endpoints when\nevery local endpoint is unavailable. Which annotation expresses this preference?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`service.cilium.io/shared: \"local-only\"`"
+        },
+        {
+          "id": "b",
+          "text": "`network.cilium.io/failover: \"remote\"`"
+        },
+        {
+          "id": "c",
+          "text": "`service.cilium.io/topology: \"same-cluster\"`"
+        },
+        {
+          "id": "d",
+          "text": "`service.cilium.io/affinity: \"local\"`"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`service.cilium.io/affinity: \"local\"` marks healthy local backends as preferred. Remote backends remain available\nas fallback when no healthy local backend is available.",
+        "ja": "`service.cilium.io/affinity: \"local\"`はHealthyなLocal Backendを優先します。\nHealthyなLocal Backendがなくなった場合にはRemote BackendへFailoverできます。"
+      }
+    },
+    {
+      "id": "cca-101",
+      "topic": "Cluster Mesh",
+      "question": "A remote cluster is unreachable for hours, and stale Global Service backends continue receiving load-balancing\nattempts. Which setting directly limits how long remote cluster data remains cached after disconnection?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`service.cilium.io/shared: \"false\"` on every remote Service"
+        },
+        {
+          "id": "b",
+          "text": "`hubble.relay.retryTimeout` set to TCP 4245"
+        },
+        {
+          "id": "c",
+          "text": "`clustermesh.cacheTTL` set to a duration greater than zero"
+        },
+        {
+          "id": "d",
+          "text": "`maxConnectedClusters` reduced to the number of currently reachable clusters"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "A positive `clustermesh.cacheTTL` revokes cached remote-cluster data if connectivity is not restored within the\nconfigured duration. The default `0s` keeps cached information indefinitely.",
+        "ja": "`clustermesh.cacheTTL`を0より大きいDurationにすると、接続がその時間内に戻らない場合にRemote ClusterのCacheを破棄します。\nDefaultの`0s`ではCacheが自動失効しないため、Stale Backendが残り得ます。"
+      }
+    },
+    {
+      "id": "cca-102",
+      "topic": "eBPF",
+      "question": "A newly compiled eBPF program contains a path that may read outside the bounds of packet data. What prevents Cilium\nfrom loading this unsafe program into the kernel?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The Kubernetes scheduler runs the program once in a sandbox pod."
+        },
+        {
+          "id": "b",
+          "text": "Hubble Relay rewrites every unsafe instruction before loading."
+        },
+        {
+          "id": "c",
+          "text": "The in-kernel eBPF verifier rejects programs it cannot prove safe."
+        },
+        {
+          "id": "d",
+          "text": "Envoy converts the program into an iptables rule set."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Before an eBPF program is accepted, the kernel verifier analyzes control flow, memory access, helper usage, and\ntermination properties. A program with an unproven out-of-bounds access is rejected.",
+        "ja": "eBPF ProgramをLoadする前にKernel VerifierがControl Flow、Memory Access、Helper利用、Terminationを検証します。\n範囲外Accessの安全性を証明できないProgramはKernelへLoadされません。"
+      }
+    },
+    {
+      "id": "cca-103",
+      "topic": "eBPF",
+      "question": "Cilium needs connection-tracking and service-backend state to be shared across many packet-processing invocations.\nWhich eBPF primitive is designed for this purpose?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A BPF map stored in kernel space"
+        },
+        {
+          "id": "b",
+          "text": "A VXLAN VNI encoded in every application header"
+        },
+        {
+          "id": "c",
+          "text": "A Gateway API Listener"
+        },
+        {
+          "id": "d",
+          "text": "A separate kernel module compiled for each endpoint"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "BPF maps are kernel-resident key/value stores. They preserve state between program invocations and can be shared\namong eBPF programs and accessed from privileged user space.",
+        "ja": "BPF MapはKernel SpaceにあるKey/Value Storeです。Program Invocation間でStateを保持でき、\n複数のeBPF Programや権限を持つUser Space Processから共有・操作できます。"
+      }
+    },
+    {
+      "id": "cca-104",
+      "topic": "eBPF",
+      "question": "You want to discard a known malicious packet as early as possible, before normal Linux networking-stack processing\nadds richer packet metadata. Which attachment point is most suitable?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The Hubble Relay gRPC listener"
+        },
+        {
+          "id": "b",
+          "text": "XDP on the receiving network device"
+        },
+        {
+          "id": "c",
+          "text": "A Kubernetes ValidatingAdmissionPolicy"
+        },
+        {
+          "id": "d",
+          "text": "The HTTPRoute reconciliation loop"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "XDP runs at the earliest practical receive point in the network driver. It is well suited to very fast filtering\nand dropping, although it has less processed metadata than later hooks.",
+        "ja": "XDPはNetwork Driverの非常に早いReceive Pointで動作します。後段HookよりMetadataは少ない一方、\n悪意あるPacketを通常のLinux Network Stack処理前に高速Dropする用途へ適しています。"
+      }
+    },
+    {
+      "id": "cca-105",
+      "topic": "eBPF",
+      "question": "Why does Cilium commonly attach endpoint policy programs to the traffic-control ingress hook on the host side of a\npod's virtual device rather than relying only on XDP?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The tc hook has useful packet metadata and can enforce L3/L4 policy as traffic enters or leaves the endpoint."
+        },
+        {
+          "id": "b",
+          "text": "XDP is available only for HTTP and tc is available only for DNS."
+        },
+        {
+          "id": "c",
+          "text": "The tc hook is the only hook that can parse Kubernetes YAML inside the kernel."
+        },
+        {
+          "id": "d",
+          "text": "The tc hook executes in Envoy and therefore requires a sidecar in every pod."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "The tc ingress hook runs later than XDP and exposes more networking metadata. On a pod-facing virtual device it is\na practical point for identity lookup, L3/L4 policy enforcement, forwarding, and proxy redirection.",
+        "ja": "tc Ingress HookはXDPより後段で動き、より多くのNetwork Metadataを利用できます。\nPod側Virtual DeviceではIdentity Lookup、L3/L4 Policy、Forwarding、Proxy Redirectを実装しやすい位置です。"
+      }
+    },
+    {
+      "id": "cca-106",
+      "topic": "eBPF",
+      "question": "What is the main performance effect of enabling an eBPF JIT compiler on a supported CPU architecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It moves eBPF execution from the kernel into the Cilium Operator."
+        },
+        {
+          "id": "b",
+          "text": "It converts every eBPF map into an etcd table before packet processing."
+        },
+        {
+          "id": "c",
+          "text": "It translates eBPF bytecode into native machine instructions instead of interpreting each instruction."
+        },
+        {
+          "id": "d",
+          "text": "It pre-renders Hubble flows as static JSON files."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "The JIT compiler emits native instructions for the host architecture. This generally reduces per-instruction\noverhead compared with executing the eBPF bytecode through the in-kernel interpreter.",
+        "ja": "eBPF JITはBytecodeをHost CPU ArchitectureのNative Machine Instructionへ変換します。\nKernel Interpreterで命令を逐次解釈するより、一般に1命令あたりのOverheadを減らせます。"
+      }
+    },
+    {
+      "id": "cca-107",
+      "topic": "eBPF",
+      "question": "A Cilium datapath is divided into independently verified stages, and one stage jumps to another without returning\nto the caller. Which eBPF mechanism is being used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A BGP route reflector"
+        },
+        {
+          "id": "b",
+          "text": "A Kubernetes ownerReference"
+        },
+        {
+          "id": "c",
+          "text": "An Envoy retry policy"
+        },
+        {
+          "id": "d",
+          "text": "A tail call through a BPF program array"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "An eBPF tail call performs a one-way jump to another compatible eBPF program selected through a program-array map.\nCilium can use this to decompose a large datapath into independently verified stages.",
+        "ja": "eBPF Tail CallはProgram Array Mapから選んだ互換Programへ、元へ戻らないJumpを行います。\nこれによりCilium Datapathを独立してVerifyされる複数Stageへ分割できます。"
+      }
+    },
+    {
+      "id": "cca-108",
+      "topic": "eBPF",
+      "question": "The Cilium agent process restarts during an upgrade, but the node datapath should continue using already loaded maps\nand programs. What Linux mechanism makes these eBPF objects survive the process lifetime?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Advertising the objects through BGP communities"
+        },
+        {
+          "id": "b",
+          "text": "Object pinning in the mounted BPF filesystem, typically `/sys/fs/bpf`"
+        },
+        {
+          "id": "c",
+          "text": "Storing the machine code in a Kubernetes Secret mounted by Envoy"
+        },
+        {
+          "id": "d",
+          "text": "Serializing the objects into every pod's `/etc/hosts` file"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Pinning eBPF programs and maps in BPFFS gives the kernel objects persistent references independent of one user-space\nprocess's file descriptors. Cilium uses this so the datapath can continue across agent restarts.",
+        "ja": "BPFFSへeBPF ProgramやMapをPinすると、User Space ProcessのFile Descriptor寿命から独立した参照を保持できます。\nCilium AgentがRestartしても既存Datapathを継続できる理由の一つです。"
+      }
+    },
+    {
+      "id": "cca-109",
+      "topic": "eBPF",
+      "question": "Cilium replaces an endpoint's eBPF policy program during a policy update. Which behavior best explains how this can\noccur without flushing all connection state?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Programs can be replaced atomically while state remains in reusable BPF maps."
+        },
+        {
+          "id": "b",
+          "text": "The kernel is rebooted with the new program while pods keep their sockets."
+        },
+        {
+          "id": "c",
+          "text": "Every existing TCP connection is migrated into an Envoy sidecar first."
+        },
+        {
+          "id": "d",
+          "text": "iptables retains eBPF state until its rule counters reach zero."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Networking eBPF programs can be updated atomically, and policy or connection state can remain in maps that are\nretained across program replacement. This separates code lifecycle from much of the datapath state.",
+        "ja": "Network用eBPF ProgramはAtomicに更新でき、PolicyやConnection Stateは再利用されるBPF Mapへ保持できます。\nつまりProgram CodeのLifecycleとDatapath Stateをある程度分離できます。"
+      }
+    },
+    {
+      "id": "cca-110",
+      "topic": "eBPF",
+      "question": "Compared with a long iptables service chain, why can Cilium's eBPF Service implementation scale more predictably as\nthe number of Services grows?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "It sends every Service request to the Cilium Operator for a scheduling decision."
+        },
+        {
+          "id": "b",
+          "text": "It removes the need to select a backend endpoint."
+        },
+        {
+          "id": "c",
+          "text": "It can look up a virtual IP and port in BPF maps instead of linearly traversing many rules."
+        },
+        {
+          "id": "d",
+          "text": "It assigns a dedicated physical NIC to every Kubernetes Service."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "Cilium represents Service and backend state in BPF maps and performs keyed lookups in the datapath. This avoids the\nlarge sequential rule traversal associated with traditional iptables implementations.",
+        "ja": "CiliumはServiceとBackendのStateをBPF Mapに保持し、DatapathでKey Lookupします。\nそのため従来のiptables実装でService数増加時に生じる長いSequential Rule Traversalを避けやすくなります。"
+      }
+    },
+    {
+      "id": "cca-111",
+      "topic": "eBPF",
+      "question": "With Cilium Socket Load-Balancing enabled, where can a ClusterIP destination be translated for a pod's `connect()`\noperation before a normal packet traverses the network stack?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "At the external BGP peer after the packet leaves the node"
+        },
+        {
+          "id": "b",
+          "text": "At cgroup socket hooks in the kernel"
+        },
+        {
+          "id": "c",
+          "text": "In the Kubernetes scheduler admission queue"
+        },
+        {
+          "id": "d",
+          "text": "Inside the Hubble Relay process"
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": {
+        "en": "Cilium can attach eBPF programs to cgroup socket hooks and translate Service destinations at socket-operation time.\nThis can bypass parts of the conventional per-packet Service path for eligible connections.",
+        "ja": "Ciliumはcgroup Socket HookへeBPF ProgramをAttachし、Socket Operation時点でService宛先を変換できます。\n対象Connectionでは通常のPacket単位Service Pathの一部をBypassできます。"
+      }
+    },
+    {
+      "id": "cca-112",
+      "topic": "eBPF",
+      "question": "A team selects Cilium's netkit device mode on newly built nodes. Which host prerequisite is specifically relevant to\ncreating netkit devices?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A sufficiently recent kernel with `CONFIG_NETKIT=y`"
+        },
+        {
+          "id": "b",
+          "text": "An Envoy sidecar injected into every workload"
+        },
+        {
+          "id": "c",
+          "text": "A userspace VXLAN daemon listening on TCP 8472"
+        },
+        {
+          "id": "d",
+          "text": "A Kubernetes controller-manager flag named `--enable-netkit`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "Netkit device mode depends on Linux netkit support, including `CONFIG_NETKIT=y`, and requires a sufficiently recent\nkernel. It is a kernel virtual-device capability, not an Envoy or Kubernetes API feature.",
+        "ja": "Netkit Device ModeにはLinux KernelのNetkit Supportが必要で、`CONFIG_NETKIT=y`と十分新しいKernelが前提です。\nEnvoyやKubernetes APIのFeatureではなくKernel Virtual Deviceの機能です。"
+      }
+    },
+    {
+      "id": "cca-113",
+      "topic": "eBPF",
+      "question": "What does Cilium's eBPF Host Routing optimization primarily attempt to avoid for eligible pod traffic crossing a\nnode?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Unnecessary traversal of slower host networking and netfilter paths by using eBPF forwarding shortcuts"
+        },
+        {
+          "id": "b",
+          "text": "Every L7 proxy operation required by an HTTP policy"
+        },
+        {
+          "id": "c",
+          "text": "All routing decisions, including the selection of a destination node"
+        },
+        {
+          "id": "d",
+          "text": "The need for a Linux kernel on Kubernetes worker nodes"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "eBPF Host Routing accelerates eligible traffic by shortcutting portions of the conventional host networking stack\nand netfilter path. It does not eliminate routing decisions or replace Envoy when L7 processing is required.",
+        "ja": "eBPF Host Routingは対象Trafficについて、従来のHost Network StackやNetfilter Pathの一部をShort-cutして高速化します。\nRouting判断そのものや、L7処理が必要な場合のEnvoyまで不要にする機能ではありません。"
+      }
+    },
+    {
+      "id": "cca-114",
+      "topic": "BGP and External Networking",
+      "question": "In BGP Control Plane v2, you need to select a group of nodes and define each node's BGP instance, local ASN, peer\naddress, and peer ASN. Which resource is the primary cluster-level starting point?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`CiliumLoadBalancerIPPool`"
+        },
+        {
+          "id": "b",
+          "text": "`CiliumBGPPeerConfig`"
+        },
+        {
+          "id": "c",
+          "text": "`CiliumBGPClusterConfig`"
+        },
+        {
+          "id": "d",
+          "text": "`CiliumBGPAdvertisement`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`CiliumBGPClusterConfig` selects nodes and defines one or more BGP instances and their peers. A peer may reference a\nreusable `CiliumBGPPeerConfig` for detailed session settings.",
+        "ja": "`CiliumBGPClusterConfig`はNodeをSelectorで選び、BGP Instance、Local ASN、Peerを定義する起点です。\n詳細なSession設定はPeerから再利用可能な`CiliumBGPPeerConfig`を参照できます。"
+      }
+    },
+    {
+      "id": "cca-115",
+      "topic": "BGP and External Networking",
+      "question": "Several BGP peers should share hold and keepalive timers, MD5 authentication, graceful restart, and address-family\nadvertisement selectors. Which resource avoids duplicating those settings?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`CiliumBGPPeerConfig`"
+        },
+        {
+          "id": "b",
+          "text": "`CiliumL2AnnouncementPolicy`"
+        },
+        {
+          "id": "c",
+          "text": "`CiliumBGPNodeConfigOverride`"
+        },
+        {
+          "id": "d",
+          "text": "`CiliumBGPAdvertisement`"
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "`CiliumBGPPeerConfig` is a reusable collection of peer-session settings, including timers, authentication, eBGP\nmultihop, graceful restart, transport, and address families.",
+        "ja": "`CiliumBGPPeerConfig`はTimer、Authentication、eBGP Multihop、Graceful Restart、Transport、\nAddress FamilyなどのPeer Session設定を複数Peerで再利用するResourceです。"
+      }
+    },
+    {
+      "id": "cca-116",
+      "topic": "BGP and External Networking",
+      "question": "You want selected peers to advertise node PodCIDRs with a BGP community, and the peer configuration already selects\nadvertisement objects by label. Which resource defines the advertised prefix type and attributes?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`CiliumPodIPPool`"
+        },
+        {
+          "id": "b",
+          "text": "`CiliumBGPClusterConfig`"
+        },
+        {
+          "id": "c",
+          "text": "`CiliumBGPAdvertisement`"
+        },
+        {
+          "id": "d",
+          "text": "`CiliumEndpointSlice`"
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "`CiliumBGPAdvertisement` defines advertisement types such as `PodCIDR` or `Service` and optional path attributes\nsuch as communities and local preference. Peer address families select these objects by label.",
+        "ja": "`CiliumBGPAdvertisement`は`PodCIDR`や`Service`などのAdvertisement Typeと、\nCommunityやLocal PreferenceなどのPath Attributeを定義します。Peer側はLabel Selectorでこれを選択します。"
+      }
+    },
+    {
+      "id": "cca-117",
+      "topic": "BGP and External Networking",
+      "question": "A network team expects an external router to initiate a BGP connection to each Cilium node on TCP 179. What must be\naccounted for in Cilium's BGP instance configuration?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Enable L2 Announcements because passive BGP is implemented through ARP."
+        },
+        {
+          "id": "b",
+          "text": "Set `peerPort: 4245` because BGP sessions terminate at Hubble Relay."
+        },
+        {
+          "id": "c",
+          "text": "Cilium listens on TCP 179 by default, so no setting or capability is needed."
+        },
+        {
+          "id": "d",
+          "text": "Set `localPort: 179` and grant the Cilium agent `CAP_NET_BIND_SERVICE`."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "Cilium BGP router instances have no listening port by default and normally initiate peer connections. To accept\ninbound sessions on privileged TCP port 179, configure `localPort: 179` and grant `CAP_NET_BIND_SERVICE`.",
+        "ja": "CiliumのBGP Router InstanceはDefaultではListen Portを持たず、自分からPeerへ接続します。\nTCP 179でInbound Sessionを受けるには`localPort: 179`と`CAP_NET_BIND_SERVICE`が必要です。"
+      }
+    },
+    {
+      "id": "cca-118",
+      "topic": "BGP and External Networking",
+      "question": "A selected LoadBalancer Service VIP is advertised from several nodes. The Service uses\n`externalTrafficPolicy: Local`, and one node loses its final local backend. What should Cilium's BGP control plane do?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Stop advertising that Service VIP from the node with no local endpoint."
+        },
+        {
+          "id": "b",
+          "text": "Continue advertising an aggregate covering every Service CIDR from that node."
+        },
+        {
+          "id": "c",
+          "text": "Ask LB IPAM to allocate a new VIP for every remaining backend."
+        },
+        {
+          "id": "d",
+          "text": "Convert the VIP into a NodePort and keep the BGP route unchanged."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": {
+        "en": "For LoadBalancerIP or ExternalIP advertisements with `externalTrafficPolicy: Local`, Cilium tracks local endpoints\nand withdraws the advertisement from a node when that node has no local endpoint. Service VIPs are normally exact\n/32 or /128 routes and can be advertised by multiple eligible nodes for ECMP.",
+        "ja": "LoadBalancerIPまたはExternalIPを`externalTrafficPolicy: Local`でAdvertiseする場合、\nCiliumはLocal Endpointを追跡し、最後のLocal EndpointがなくなったNodeからVIP RouteをWithdrawします。\nService VIPは通常/32または/128のExact Routeです。"
+      }
+    },
+    {
+      "id": "cca-119",
+      "topic": "BGP and External Networking",
+      "question": "Two non-conflicting LoadBalancer Services in the same namespace should intentionally share `20.0.10.100`, which belongs to a matching\nCilium LB IPAM pool. Which metadata combination is correct on both Services?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "`cilium.io/load-balancer-ip: \"20.0.10.100\"` and `externalTrafficPolicy: Local`"
+        },
+        {
+          "id": "b",
+          "text": "`service.cilium.io/global: \"20.0.10.100\"` and different sharing keys"
+        },
+        {
+          "id": "c",
+          "text": "`io.cilium/bgp-control-plane: \"shared\"` and identical ClusterIP values"
+        },
+        {
+          "id": "d",
+          "text": "`lbipam.cilium.io/ips: \"20.0.10.100\"` and the same `lbipam.cilium.io/sharing-key` value"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": {
+        "en": "`lbipam.cilium.io/ips` requests a specific address from a matching `CiliumLoadBalancerIPPool`.\n`lbipam.cilium.io/sharing-key` allows Services with the same key and non-conflicting ports to share that IP.",
+        "ja": "`lbipam.cilium.io/ips`でMatchingする`CiliumLoadBalancerIPPool`から特定IPを要求します。\n同じ`lbipam.cilium.io/sharing-key`を持ちPortがConflictしないService同士は、そのIPを共有できます。"
+      }
+    },
+    {
+      "id": "cca-120",
+      "topic": "BGP and External Networking",
+      "question": "In a bare-metal site without BGP, external clients on the same LAN must reach LoadBalancer VIPs. Which design is\nmost accurate for Cilium L2 Announcements?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Use only `externalTrafficPolicy: Local`; L2 Announcements requires it to avoid dropped traffic."
+        },
+        {
+          "id": "b",
+          "text": "Use Hubble Relay as an ARP proxy; no Cilium Service load balancing is involved."
+        },
+        {
+          "id": "c",
+          "text": "Use a `CiliumL2AnnouncementPolicy`; enable kube-proxy replacement; one elected node answers ARP/NDP per VIP."
+        },
+        {
+          "id": "d",
+          "text": "Use a `CiliumBGPAdvertisement`; every node simultaneously answers ARP for the VIP with no election."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": {
+        "en": "L2 Announcements exposes selected ExternalIPs or LoadBalancer IPs on a local Layer 2 network through ARP/NDP.\nA per-Service lease elects one responding node, kube-proxy replacement is required, and\n`externalTrafficPolicy: Local` is currently incompatible because the announcer may lack a local backend.",
+        "ja": "L2 Announcementsは選択したExternalIPやLoadBalancer IPを同一L2 NetworkへARP/NDPで公開します。\nServiceごとのLeaseで応答Nodeを1台選び、kube-proxy Replacementが必要です。\n現状`externalTrafficPolicy: Local`とは非互換で、Local BackendのないNodeが選ばれるとDropし得ます。"
       }
     }
   ]
