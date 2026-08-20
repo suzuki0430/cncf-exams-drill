@@ -5,15 +5,15 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rawCcaExam from "./data/cca.json";
 import {
+  type ContentLanguage,
   type ExamData,
   type ExamQuestion,
-  type ExplanationLanguage,
   validateExamData,
 } from "./lib/exam";
 import {
-  readExplanationLanguage,
+  readContentLanguage,
   readMasteredQuestionIds,
-  writeExplanationLanguage,
+  writeContentLanguage,
   writeMasteredQuestionIds,
 } from "./lib/progress";
 
@@ -31,7 +31,7 @@ interface AnswerState {
  * Runs the complete local study experience for the currently bundled exam.
  *
  * Session answers intentionally remain in memory so every new practice starts
- * from question one. Only mastery and explanation language are durable.
+ * from question one. Only mastery and content language are durable.
  *
  * @returns The exam library, active question, or score view.
  */
@@ -42,7 +42,7 @@ export default function Home() {
   const [sessionQuestionIds, setSessionQuestionIds] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<string, AnswerState>>({});
   const [masteredIds, setMasteredIds] = useState<Set<string>>(new Set());
-  const [language, setLanguage] = useState<ExplanationLanguage>("en");
+  const [language, setLanguage] = useState<ContentLanguage>("en");
   const [storageReady, setStorageReady] = useState(false);
   const [storageWarning, setStorageWarning] = useState<string | null>(null);
 
@@ -56,7 +56,7 @@ export default function Home() {
     // Browser storage is external state and can only be read after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMasteredIds(knownStoredIds);
-    setLanguage(readExplanationLanguage(window.localStorage));
+    setLanguage(readContentLanguage(window.localStorage));
     setStorageReady(true);
   }, []);
 
@@ -201,11 +201,11 @@ export default function Home() {
     }
   }
 
-  /** Updates and persists the shared explanation language preference. */
-  function changeLanguage(nextLanguage: ExplanationLanguage): void {
+  /** Updates and persists the language shared by all exam content. */
+  function changeLanguage(nextLanguage: ContentLanguage): void {
     setLanguage(nextLanguage);
     try {
-      writeExplanationLanguage(window.localStorage, nextLanguage);
+      writeContentLanguage(window.localStorage, nextLanguage);
       setStorageWarning(null);
     } catch {
       setStorageWarning("Language changed for this session, but could not be saved.");
@@ -419,7 +419,7 @@ interface QuizViewProps {
   answeredCount: number;
   remainingCount: number;
   isMastered: boolean;
-  language: ExplanationLanguage;
+  language: ContentLanguage;
   storageWarning: string | null;
   onBackToLibrary: () => void;
   onChoiceSelect: (questionId: string, choiceId: string) => void;
@@ -427,10 +427,10 @@ interface QuizViewProps {
   onPrevious: () => void;
   onNext: () => void;
   onToggleMastered: (questionId: string) => void;
-  onLanguageChange: (language: ExplanationLanguage) => void;
+  onLanguageChange: (language: ContentLanguage) => void;
 }
 
-/** Renders one question, its locked answer state, and bilingual explanation. */
+/** Renders one bilingual question, its locked answer state, and explanation. */
 function QuizView({
   exam,
   mode,
@@ -462,9 +462,17 @@ function QuizView({
           <span className="brand-mark">CD</span>
           <span>CNCF Exams Drill</span>
         </button>
-        <div className="quiz-header-meta">
-          <span className="mode-chip">{mode === "practice" ? "Full practice" : "Review"}</span>
-          <span>{exam.shortName}</span>
+        <div className="quiz-header-controls">
+          <div className="quiz-header-meta">
+            <span className="mode-chip">
+              {mode === "practice" ? "Full practice" : "Review"}
+            </span>
+            <span>{exam.shortName}</span>
+          </div>
+          <LanguageToggle
+            language={language}
+            onLanguageChange={onLanguageChange}
+          />
         </div>
       </header>
 
@@ -494,8 +502,12 @@ function QuizView({
               <span>{question.topic}</span>
               <span>{question.id.toUpperCase()}</span>
             </div>
-            <div className="question-copy" id="question-title">
-              <Markdown content={question.question} />
+            <div
+              className="question-copy"
+              id="question-title"
+              lang={language}
+            >
+              <Markdown content={question.question[language]} />
             </div>
 
             <fieldset className="choices" disabled={answer.submitted}>
@@ -521,8 +533,8 @@ function QuizView({
                     <span className="choice-letter" aria-hidden="true">
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="choice-copy">
-                      <Markdown content={choice.text} />
+                    <span className="choice-copy" lang={language}>
+                      <Markdown content={choice.text[language]} />
                     </span>
                     {answer.submitted && choice.id === question.correctChoiceId ? (
                       <span className="choice-result">Correct</span>
@@ -555,7 +567,6 @@ function QuizView({
                 isCorrect={isCorrect}
                 isMastered={isMastered}
                 language={language}
-                onLanguageChange={onLanguageChange}
                 onToggleMastered={() => onToggleMastered(question.id)}
               />
             )}
@@ -609,18 +620,16 @@ interface ExplanationPanelProps {
   question: ExamQuestion;
   isCorrect: boolean;
   isMastered: boolean;
-  language: ExplanationLanguage;
-  onLanguageChange: (language: ExplanationLanguage) => void;
+  language: ContentLanguage;
   onToggleMastered: () => void;
 }
 
-/** Displays answer feedback, language controls, and the persistent mastery mark. */
+/** Displays answer feedback, the localized explanation, and mastery control. */
 function ExplanationPanel({
   question,
   isCorrect,
   isMastered,
   language,
-  onLanguageChange,
   onToggleMastered,
 }: ExplanationPanelProps) {
   return (
@@ -633,26 +642,8 @@ function ExplanationPanel({
           <span className="result-label">{isCorrect ? "Correct" : "Not quite"}</span>
           <h2>Explanation</h2>
         </div>
-        <div className="language-toggle" aria-label="Explanation language">
-          <button
-            type="button"
-            className={language === "en" ? "active" : ""}
-            aria-pressed={language === "en"}
-            onClick={() => onLanguageChange("en")}
-          >
-            EN
-          </button>
-          <button
-            type="button"
-            className={language === "ja" ? "active" : ""}
-            aria-pressed={language === "ja"}
-            onClick={() => onLanguageChange("ja")}
-          >
-            JA
-          </button>
-        </div>
       </div>
-      <div className="explanation-copy" lang={language === "ja" ? "ja" : "en"}>
+      <div className="explanation-copy" lang={language}>
         <Markdown content={question.explanation[language]} />
       </div>
       <div className="mastery-control">
@@ -741,6 +732,38 @@ function SiteHeader() {
       </a>
       <span className="local-badge">Local study workspace</span>
     </header>
+  );
+}
+
+interface LanguageToggleProps {
+  language: ContentLanguage;
+  onLanguageChange: (language: ContentLanguage) => void;
+}
+
+/** Switches questions, choices, and explanations between English and Japanese. */
+function LanguageToggle({
+  language,
+  onLanguageChange,
+}: LanguageToggleProps) {
+  return (
+    <div className="language-toggle" role="group" aria-label="Content language">
+      <button
+        type="button"
+        className={language === "en" ? "active" : ""}
+        aria-pressed={language === "en"}
+        onClick={() => onLanguageChange("en")}
+      >
+        EN
+      </button>
+      <button
+        type="button"
+        className={language === "ja" ? "active" : ""}
+        aria-pressed={language === "ja"}
+        onClick={() => onLanguageChange("ja")}
+      >
+        JA
+      </button>
+    </div>
   );
 }
 

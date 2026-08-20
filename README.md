@@ -16,7 +16,8 @@ database, or deployment requirement.
 - Review includes only questions not marked as mastered.
 - Answers remain editable until **Submit answer**, then become locked.
 - Correctness and an explanation appear immediately after submission.
-- Explanations switch between English and Japanese; the preference is saved.
+- Questions, choices, and explanations switch together between English and
+  Japanese; the preference is saved.
 - Questions, choices, and explanations support GitHub-flavored Markdown.
 - The result screen shows the score and percentage.
 - Responsive layouts and keyboard-accessible controls are included.
@@ -52,12 +53,15 @@ Each question uses this shape:
 {
   "id": "cca-001",
   "topic": "Architecture",
-  "question": "Question text with **Markdown** support",
+  "question": {
+    "en": "Question text with **Markdown** support",
+    "ja": "**Markdown**対応の問題文"
+  },
   "choices": [
-    { "id": "a", "text": "First choice" },
-    { "id": "b", "text": "Second choice" },
-    { "id": "c", "text": "Third choice" },
-    { "id": "d", "text": "Fourth choice" }
+    { "id": "a", "text": { "en": "First choice", "ja": "選択肢1" } },
+    { "id": "b", "text": { "en": "Second choice", "ja": "選択肢2" } },
+    { "id": "c", "text": { "en": "Third choice", "ja": "選択肢3" } },
+    { "id": "d", "text": { "en": "Fourth choice", "ja": "選択肢4" } }
   ],
   "correctChoiceId": "b",
   "explanation": {
@@ -72,7 +76,7 @@ Important authoring rules:
 - Keep every question `id` unique and stable. Mastery is saved by this ID.
 - Provide exactly four choices with unique IDs.
 - Set `correctChoiceId` to one of those four choice IDs.
-- Provide both `en` and `ja` explanations.
+- Provide both `en` and `ja` text for every question, choice, and explanation.
 - Use fenced code blocks, inline code, lists, tables, and links as needed.
 
 [`schemas/exam.schema.json`](schemas/exam.schema.json) is referenced from the
@@ -85,7 +89,7 @@ duplicate IDs or invalid correct-answer references.
 Only the following values are stored in `localStorage`:
 
 - mastered question IDs, separately namespaced by exam ID;
-- the latest English/Japanese explanation preference.
+- the latest English/Japanese content preference.
 
 Answers and scores are not persisted. Starting a new session always begins at
 the first applicable question. The **Reset mastered questions** action clears
