@@ -1,26 +1,29 @@
-/** A language available for question explanations. */
-export type ExplanationLanguage = "en" | "ja";
+/** A language available for learner-facing exam content. */
+export type ContentLanguage = "en" | "ja";
+
+/** English and Japanese variants of one Markdown-capable text field. */
+export type LocalizedText = Record<ContentLanguage, string>;
 
 /** One selectable answer in a four-choice question. */
 export interface ExamChoice {
   id: string;
-  text: string;
+  text: LocalizedText;
 }
 
-/** One ordered multiple-choice question and its bilingual explanation. */
+/** One ordered multiple-choice question with fully bilingual content. */
 export interface ExamQuestion {
   id: string;
   topic: string;
-  question: string;
+  question: LocalizedText;
   choices: [ExamChoice, ExamChoice, ExamChoice, ExamChoice];
   correctChoiceId: string;
-  explanation: Record<ExplanationLanguage, string>;
+  explanation: LocalizedText;
 }
 
 /** A complete exam file that can be loaded without a database. */
 export interface ExamData {
   $schema?: string;
-  schemaVersion: 1;
+  schemaVersion: 2;
   id: string;
   shortName: string;
   title: string;
@@ -56,8 +59,8 @@ export function validateExamData(input: unknown): ExamData {
   assertString(input.title, "Exam title");
   assertString(input.description, "Exam description");
 
-  if (input.schemaVersion !== 1) {
-    throw new Error("Exam schemaVersion must be 1.");
+  if (input.schemaVersion !== 2) {
+    throw new Error("Exam schemaVersion must be 2.");
   }
   if (input.contentStatus !== "sample" && input.contentStatus !== "ready") {
     throw new Error('Exam contentStatus must be "sample" or "ready".');
@@ -93,7 +96,7 @@ function validateQuestion(
 
   assertString(input.id, `Question ${index + 1} id`);
   assertString(input.topic, `Question ${index + 1} topic`);
-  assertString(input.question, `Question ${index + 1} text`);
+  validateLocalizedText(input.question, `Question ${index + 1} text`);
 
   if (questionIds.has(input.id)) {
     throw new Error(`Question id "${input.id}" is duplicated.`);
@@ -110,7 +113,10 @@ function validateQuestion(
       throw new Error(`Choice ${choiceIndex + 1} in "${input.id}" must be an object.`);
     }
     assertString(choice.id, `Choice ${choiceIndex + 1} id in "${input.id}"`);
-    assertString(choice.text, `Choice ${choiceIndex + 1} text in "${input.id}"`);
+    validateLocalizedText(
+      choice.text,
+      `Choice ${choiceIndex + 1} text in "${input.id}"`,
+    );
     if (choiceIds.has(choice.id)) {
       throw new Error(`Choice id "${choice.id}" is duplicated in "${input.id}".`);
     }
@@ -122,11 +128,22 @@ function validateQuestion(
     throw new Error(`Correct choice "${input.correctChoiceId}" is missing in "${input.id}".`);
   }
 
-  if (!isRecord(input.explanation)) {
-    throw new Error(`Question "${input.id}" must include explanations.`);
+  validateLocalizedText(input.explanation, `Explanation in "${input.id}"`);
+}
+
+/**
+ * Validates both language variants of one localized Markdown string.
+ *
+ * @param value - Candidate object containing `en` and `ja` strings.
+ * @param label - Human-readable field name for actionable errors.
+ * @throws {Error} When either translation is absent or empty.
+ */
+function validateLocalizedText(value: unknown, label: string): void {
+  if (!isRecord(value)) {
+    throw new Error(`${label} must include English and Japanese text.`);
   }
-  assertString(input.explanation.en, `English explanation in "${input.id}"`);
-  assertString(input.explanation.ja, `Japanese explanation in "${input.id}"`);
+  assertString(value.en, `${label} (English)`);
+  assertString(value.ja, `${label} (Japanese)`);
 }
 
 /**

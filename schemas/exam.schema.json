@@ -16,7 +16,7 @@
   ],
   "properties": {
     "$schema": { "type": "string" },
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
     "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "shortName": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
@@ -29,13 +29,22 @@
     }
   },
   "$defs": {
+    "localizedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en", "ja"],
+      "properties": {
+        "en": { "type": "string", "minLength": 1 },
+        "ja": { "type": "string", "minLength": 1 }
+      }
+    },
     "choice": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "text"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
-        "text": { "type": "string", "minLength": 1 }
+        "text": { "$ref": "#/$defs/localizedText" }
       }
     },
     "question": {
@@ -52,7 +61,7 @@
       "properties": {
         "id": { "type": "string", "minLength": 1 },
         "topic": { "type": "string", "minLength": 1 },
-        "question": { "type": "string", "minLength": 1 },
+        "question": { "$ref": "#/$defs/localizedText" },
         "choices": {
           "type": "array",
           "minItems": 4,
@@ -60,15 +69,7 @@
           "items": { "$ref": "#/$defs/choice" }
         },
         "correctChoiceId": { "type": "string", "minLength": 1 },
-        "explanation": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["en", "ja"],
-          "properties": {
-            "en": { "type": "string", "minLength": 1 },
-            "ja": { "type": "string", "minLength": 1 }
-          }
-        }
+        "explanation": { "$ref": "#/$defs/localizedText" }
       }
     }
   }

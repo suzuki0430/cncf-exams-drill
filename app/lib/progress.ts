@@ -1,7 +1,8 @@
-import type { ExplanationLanguage } from "./exam";
+import type { ContentLanguage } from "./exam";
 
 const STORAGE_PREFIX = "cncf-exams-drill";
-const LANGUAGE_KEY = `${STORAGE_PREFIX}:explanation-language`;
+const CONTENT_LANGUAGE_KEY = `${STORAGE_PREFIX}:content-language`;
+const LEGACY_EXPLANATION_LANGUAGE_KEY = `${STORAGE_PREFIX}:explanation-language`;
 
 interface StoredMastery {
   version: 1;
@@ -63,26 +64,33 @@ export function writeMasteredQuestionIds(
 }
 
 /**
- * Reads the preferred explanation language.
+ * Reads the preferred language for questions, choices, and explanations.
+ *
+ * The former explanation-only preference is accepted as a one-way migration,
+ * so existing users keep their selection after upgrading the app.
  *
  * @param storage - Browser-compatible storage implementation.
  * @returns The stored language, defaulting to English.
  */
-export function readExplanationLanguage(storage: Storage): ExplanationLanguage {
-  return storage.getItem(LANGUAGE_KEY) === "ja" ? "ja" : "en";
+export function readContentLanguage(storage: Storage): ContentLanguage {
+  const language =
+    storage.getItem(CONTENT_LANGUAGE_KEY) ??
+    storage.getItem(LEGACY_EXPLANATION_LANGUAGE_KEY);
+  return language === "ja" ? "ja" : "en";
 }
 
 /**
- * Persists the preferred explanation language for future sessions.
+ * Persists the preferred content language for future sessions.
  *
  * @param storage - Browser-compatible storage implementation.
- * @param language - Explanation language selected by the learner.
+ * @param language - Content language selected by the learner.
  */
-export function writeExplanationLanguage(
+export function writeContentLanguage(
   storage: Storage,
-  language: ExplanationLanguage,
+  language: ContentLanguage,
 ): void {
-  storage.setItem(LANGUAGE_KEY, language);
+  storage.setItem(CONTENT_LANGUAGE_KEY, language);
+  storage.removeItem(LEGACY_EXPLANATION_LANGUAGE_KEY);
 }
 
 /**
