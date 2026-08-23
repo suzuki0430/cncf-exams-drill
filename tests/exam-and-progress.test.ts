@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { validateExamData } from "../app/lib/exam";
+import { escapeStandaloneNumber } from "../app/lib/markdown";
 import {
   readContentLanguage,
   readMasteredQuestionIds,
@@ -95,6 +96,13 @@ test("rejects duplicate stable question IDs", async () => {
   invalid.questions[1].id = invalid.questions[0].id;
 
   assert.throws(() => validateExamData(invalid), /Question id .* is duplicated/);
+});
+
+test("escapes standalone numeric choices without changing normal Markdown", () => {
+  assert.equal(escapeStandaloneNumber("4245."), "4245\\.");
+  assert.equal(escapeStandaloneNumber("  4245.  "), "  4245\\.  ");
+  assert.equal(escapeStandaloneNumber("TCP 4245."), "TCP 4245.");
+  assert.equal(escapeStandaloneNumber("1. First item"), "1. First item");
 });
 
 test("stores mastery separately for each exam", () => {
