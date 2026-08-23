@@ -16,6 +16,7 @@ import {
   writeContentLanguage,
   writeMasteredQuestionIds,
 } from "./lib/progress";
+import { escapeStandaloneNumber } from "./lib/markdown";
 
 const exam = validateExamData(rawCcaExam);
 
@@ -769,7 +770,11 @@ function LanguageToggle({
 
 /** Renders safe Markdown used by questions, choices, and explanations. */
 function Markdown({ content }: { content: string }) {
-  return <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>;
+  return (
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+      {escapeStandaloneNumber(content)}
+    </ReactMarkdown>
+  );
 }
 
 /** Displays a recoverable browser-storage problem without blocking study. */
